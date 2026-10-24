@@ -17,6 +17,7 @@ typeset -A APP_IDS APP_TOKENS APP_TEAMS LS_IDS LS_NAMES LS_LIVE
 typeset -a APP_PATHS VENDORS
 
 index_installed() {
+  (( $#APP_PATHS )) && return  # already indexed in this run
   local app plist id t
   local -a parts
   for app in /Applications/*.app /Applications/*/*.app $HOME/Applications/*.app $HOME/Applications/*/*.app \

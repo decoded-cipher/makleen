@@ -62,9 +62,35 @@ editor() {
 collect_caches() {
   progress "Measuring tool caches…"
   load_catalog caches
+  collect_jetbrains_caches
   collect_brew_cache
   collect_docker_cache
   collect_unavailable_simulators
+}
+
+# ---- caches that need more than a path ----
+
+# Each JetBrains IDE upgrade leaves the previous version's caches and logs behind
+# (IntelliJIdea2024.3 next to IntelliJIdea2025.2); keep the newest version of each IDE.
+collect_jetbrains_caches() {
+  index_installed
+  (( ${${(k)APP_IDS}[(I)com.jetbrains.*]} )) || return  # no JetBrains IDE installed: it's a leftover
+  local base d product
+  local -a stale versions products
+  for base in $HOME/Library/Caches/JetBrains $HOME/Library/Logs/JetBrains; do
+    products=()
+    for d in $base/*(/); do
+      [[ ${d:t} =~ '^(.*[^0-9.])[0-9]{4}\.[0-9]+$' ]] && products+=($match[1])
+    done
+    for product in ${(u)products}; do
+      versions=($base/${(b)product}[0-9][0-9][0-9][0-9].<->(/nOn))
+      for d in $versions[2,-1]; do untouchable $d || stale+=($d); done
+    done
+  done
+  (( $#stale )) || return
+  local kb=$(kb_of $stale)
+  (( kb >= 10240 )) && add_item caches "JetBrains caches of old IDE versions" $kb rm "${(F)stale}" \
+    "keeps the newest version of each IDE"
 }
 
 # ---- caches whose size only the tool itself can tell ----
