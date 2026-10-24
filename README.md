@@ -95,24 +95,40 @@ Each leftover is either confirmed or marked **check first**:
 
 ### Tool caches
 
-| Cache | Cleaned with |
-|---|---|
-| npm cache | `npm cache clean --force` |
-| npx package cache (`~/.npm/_npx`) | deleted |
-| Bun install cache | `bun pm cache rm` |
-| pnpm store | `pnpm store prune`, which removes only packages no project uses |
-| Yarn cache | `yarn cache clean` |
-| Go module cache, Go build cache | `go clean -modcache`, `go clean -cache` |
-| uv cache | `uv cache clean` |
-| pip cache | `pip3 cache purge` |
-| CocoaPods cache | `pod cache clean --all` |
-| Homebrew old versions and downloads | `brew cleanup --prune=all` |
-| Docker build cache | `docker builder prune -af` (measured only while Docker is running) |
-| Unavailable iOS simulators | `xcrun simctl delete unavailable` |
-| Puppeteer browsers, Gradle caches, Arduino download staging, Expo simulator/APK caches, Wrangler logs, Xcode DerivedData | deleted |
-| VS Code caches, downloaded extension packages, superseded extension versions | deleted |
+The caches makkili knows are listed in [catalog.zsh](catalog.zsh), one line each. Only the ones that exist
+on your Mac, and whose tool is installed where that matters, show up.
 
-Cache folders under 10 MB are not listed.
+| Area | Caches |
+|---|---|
+| JavaScript | npm, npx, Bun, pnpm (unused packages only), Yarn, Deno, Puppeteer, Playwright, Cypress, Electron, node-gyp, Prisma, Expo, Wrangler logs |
+| Go, Rust | Go module and build caches, Cargo downloaded crates |
+| Python | uv, pip, Poetry, Conda packages |
+| JVM | Gradle caches and wrapper distributions, Maven repository (starts unticked: it also holds what you `mvn install`ed) |
+| Ruby, PHP, Dart | RubyGems, Bundler, Composer, Dart and Flutter packages |
+| Apple and mobile | CocoaPods, Xcode DerivedData and device support files, simulator caches, Swift Package Manager, Android build caches, unavailable simulators |
+| Browsers | Chrome, Brave, Edge and Firefox caches only; history, logins and settings stay |
+| Editors | VS Code, Cursor, VSCodium and Windsurf caches and superseded extension versions; JetBrains caches of old IDE versions, keeping the newest of each IDE |
+| Apps | caches of installed apps in `~/Library/Caches` over 50 MB |
+| Others | Homebrew old versions and downloads, Docker build cache, Arduino download staging |
+
+Where a tool has its own clean command (`npm cache clean`, `go clean -modcache`, `brew cleanup`,
+`docker builder prune`, …), makkili uses it; other caches are deleted. Items that belong to an app,
+such as browser, editor and app caches, can't be selected while that app runs. Cache folders under
+10 MB are not listed.
+
+**Add your own.** Put lines in the same format in `~/.config/makkili/catalog.zsh`; they're loaded after
+the built-in catalog:
+
+```zsh
+cache "My tool's cache"  ~/.mytool/cache
+cache "Other tool cache" ~/Library/Caches/othertool  run="othertool cache clear" needs=othertool
+extra big-models "Downloaded models" ~/models  note="downloaded again when needed"
+```
+
+`run=` cleans with the tool's own command instead of deleting, `needs=` skips the line when that command
+isn't installed, `while=` locks the item while a matching process runs, `note=` explains it, and `off` makes
+it start unticked. An `extra` starts unticked unless its ID is listed in `EXTRAS`. A path in single quotes
+is expanded only when the line is used: `'$(go env GOMODCACHE)'` runs `go` only if it's installed.
 
 ### Build folders in idle projects
 
@@ -154,11 +170,14 @@ Each idle project is one line in the checklist, covering all of its build folder
 | `chrome-ai-model` | Chrome's on-device AI model (`OptGuideOnDeviceModel`) | also sets the Chrome policy `GenAILocalFoundationalModelSettings` to 1 so it isn't downloaded again |
 | `android-emulators` | the emulators in `~/.android/avd` | recreate them in Android Studio → Device Manager |
 | `ollama-models` | every pulled Ollama model, with `ollama rm` | Ollama must be running; `ollama pull` brings a model back |
-| `old-node-versions` | nvm Node versions other than the default, the current one, and those pinned by `.nvmrc` or `.node-version` | an exact pin keeps that version; a major-only pin keeps the newest installed version of that major |
+| `old-node-versions` | Node versions from nvm, fnm, Volta, asdf or mise that nothing needs | keeps each manager's default and newest version, the `node` on your `PATH`, and versions pinned by `.nvmrc`, `.node-version` or `.tool-versions` in your projects or home folder; an exact pin keeps that version, a major-only pin the newest of that major |
 | `docker-unused` | stopped containers and images no container uses | data in a stopped container that isn't in a volume is lost |
-| `claude-desktop-vm` | Claude desktop's VM bundles, while Claude.app is installed | blocked by the default `NEVER_TOUCH` |
+| `ml-models` | Hugging Face and PyTorch model downloads (`~/.cache/huggingface/hub`, `~/.cache/torch`) | downloaded again the next time a model is used |
+| `xcode-archives` | Xcode archives of builds you made | you need them to symbolicate crash reports from builds you shipped |
+| `claude-desktop-vm` | Claude desktop's VM bundles, while Claude.app is installed | downloaded again if you use its agent features |
 
-Extras listed in `EXTRAS` start ticked; the others are listed unticked.
+Extras listed in `EXTRAS` start ticked; the others are listed unticked. The ones that are plain folders
+(`ml-models`, `xcode-archives`) are catalog lines, so you can add more of your own the same way.
 
 ### Apps you don't use
 
@@ -171,13 +190,13 @@ What makkili never does:
 
 - **Use `sudo`.** Everything it deletes or moves itself has to be at least two folders deep inside your
   home folder, and macOS protects its own system files anyway.
-- **Touch protected paths.** Anything matching `NEVER_TOUCH` is skipped by every scan and refused by the
-  delete and move steps. By default that is any path containing `claude` or `anthropic`, which protects
-  Claude Code's settings and history.
+- **Touch protected paths.** Anything matching a `NEVER_TOUCH` pattern you set is skipped by every scan
+  and refused by the delete and move steps. Nothing is protected this way by default; a pattern matches
+  anywhere in the path, so keep it specific, for example `'*/.claude/*'`.
 - **Look in your personal data.** Photos, Mail, Messages and the keychain are never scanned or cleaned.
   Desktop, Documents and Downloads are only searched for projects if you add them to `PROJECT_ROOTS`.
 - **Delete without asking.** Nothing happens until you confirm the plan, unless you pass `--yes`.
-- **Clean anything in use.** Items that belong to a running app, such as VS Code, Chrome, the iOS
+- **Clean anything in use.** Items that belong to a running app, such as a browser, an editor, the iOS
   Simulator or an Android emulator, can't be selected.
 
 What cleaning costs:
@@ -310,13 +329,15 @@ zsh.
 | `PROTECT` | none | globs of project paths whose build folders are never touched |
 | `EXTRAS` | none | extras that start ticked, by ID |
 | `LEFTOVER_IGNORE` | none | globs of `~/Library` entry names never reported as leftovers |
-| `NEVER_TOUCH` | `('*claude*' '*anthropic*')` | lowercase globs of paths never reported, moved or deleted; add with `NEVER_TOUCH+=(…)` to keep the defaults |
+| `NEVER_TOUCH` | none | lowercase globs of paths never reported, moved or deleted; a pattern matches anywhere in the path |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
 | `QUARANTINE_DAYS` | `14` | age at which `makkili purge` deletes a batch |
 | `LOG_DIR` | `logs/` next to the script | where run logs go |
 
-Environment variables: `MAKKILI_CONFIG` points at a different config file, and `MAKKILI_HOME` moves the
-state folder (default `~/.makkili`, which holds the quarantine).
+Your own caches and extras go in `~/.config/makkili/catalog.zsh`; see [Tool caches](#tool-caches).
+
+Environment variables: `MAKKILI_CONFIG` and `MAKKILI_CATALOG` point at a different config or catalog
+file, and `MAKKILI_HOME` moves the state folder (default `~/.makkili`, which holds the quarantine).
 
 ## Limitations
 
@@ -327,15 +348,18 @@ state folder (default `~/.makkili`, which holds the quarantine).
 - System-wide leftovers outside your home folder, such as files in `/etc` or `/Library` left by an
   uninstaller, are out of scope because makkili never uses `sudo`.
 - Docker's build cache and unused images are measured only while Docker is running.
+- Catalog lines for tools that weren't on the test Mac (Cargo, Maven, Conda, Composer, Dart and others)
+  were checked against test folders, not real installs of those tools.
 
 ## Project layout
 
 | File | What it holds |
 |---|---|
 | `makkili` | usage text, settings, config loading and the command dispatcher |
-| `lib/common.zsh` | the item table, sizes, logging, and the safety checks (`NEVER_TOUCH`, `safe_path`) |
+| `catalog.zsh` | the caches and simple extras makkili knows, one line each |
+| `lib/common.zsh` | the item table, sizes, logging, catalog loading, and the safety checks (`NEVER_TOUCH`, `safe_path`) |
 | `lib/leftovers.zsh` | detecting data of uninstalled apps |
-| `lib/caches.zsh` | tool caches |
+| `lib/caches.zsh` | the `cache` and `editor` catalog entries, and caches that need more than a path: JetBrains, installed apps, Homebrew, Docker |
 | `lib/projects.zsh` | idle projects and their build folders |
 | `lib/extras.zsh` | optional extras |
 | `lib/scan.zsh` | running the scanners and the default selection |
@@ -345,8 +369,8 @@ state folder (default `~/.makkili`, which holds the quarantine).
 | `lib/quarantine.zsh` | `quarantine`, `restore` and `purge` |
 | `lib/schedule.zsh` | the weekly report |
 
-To add a cache, add one line to `collect_caches` in `lib/caches.zsh`: `cache_dir` for a folder that can
-simply be deleted, or `cache_tool` for one the tool should clean itself.
+To add a cache everyone should get, add a line to `catalog.zsh`. Only caches that need logic, like
+keeping the newest version of something, belong in `lib/caches.zsh`.
 
 ## Uninstall
 

@@ -17,19 +17,21 @@ PROTECT=(
 # Run `makkili scan extras` to see what each one would free.
 #   ios-simulators     simulator devices + downloaded iOS runtimes
 #   chrome-ai-model    Chrome's on-device AI model (and the policy that stops re-downloading it)
-#   claude-desktop-vm  Claude desktop VM bundles (blocked while NEVER_TOUCH has *claude*)
+#   claude-desktop-vm  Claude desktop VM bundles, while Claude.app is installed
 #   android-emulators  AVDs in ~/.android/avd
 #   ollama-models      every pulled Ollama model
-#   old-node-versions  nvm versions other than the default and the ones pinned by .nvmrc
+#   old-node-versions  Node versions from nvm, fnm, Volta, asdf or mise that nothing pins
 #   docker-unused      stopped containers + images no container uses
+#   ml-models          Hugging Face and PyTorch model downloads
+#   xcode-archives     Xcode archives of builds you made
 EXTRAS=()
 
 # ~/Library entry names never reported as leftovers (globs).
 LEFTOVER_IGNORE=()
 
-# Paths matching these (lowercase globs) are never reported, moved or deleted.
-# Defaults protect Claude / Claude Code data; add with +=, e.g. NEVER_TOUCH+=("*mkcert*").
-# NEVER_TOUCH+=()
+# Paths matching these (lowercase globs) are never reported, moved or deleted. Empty by default.
+# A pattern matches anywhere in the path, so keep it specific.
+# NEVER_TOUCH=('*/.claude/*' '*/mkcert*')
 
 # Apps not opened in this many days are listed (report only).
 UNUSED_APP_DAYS=90
