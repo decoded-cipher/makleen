@@ -66,7 +66,10 @@ cache "Android build caches"         ~/.android/build-cache ~/.android/cache
 cache "Arduino download staging"     ~/Library/Arduino15/staging
 
 # ---- Editors ----
-editor "VS Code" "~/Library/Application Support/Code" ~/.vscode/extensions while="Visual Studio Code.app/Contents/MacOS"
+editor "VS Code"  "~/Library/Application Support/Code"     ~/.vscode/extensions     while="Visual Studio Code.app/Contents/MacOS"
+editor "Cursor"   "~/Library/Application Support/Cursor"   ~/.cursor/extensions     while="Cursor.app/Contents/MacOS"
+editor "VSCodium" "~/Library/Application Support/VSCodium" ~/.vscode-oss/extensions while="VSCodium.app/Contents/MacOS"
+editor "Windsurf" "~/Library/Application Support/Windsurf" ~/.windsurf/extensions   while="Windsurf.app/Contents/MacOS"
 
 # ---- Extras ----
 extra ml-models      "Machine learning model downloads" ~/.cache/huggingface/hub ~/.cache/torch \
