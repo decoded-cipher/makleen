@@ -21,7 +21,7 @@
 #
 # Checklist keys: up/down or j/k move, space selects, a toggles the section, enter continues, q quits
 #
-# Config: ~/.config/makkili/config.zsh (plain zsh)
+# Config: ~/.config/makkili/config.zsh (plain zsh, see config.example.zsh)
 
 emulate zsh
 setopt extended_glob null_glob pipefail
