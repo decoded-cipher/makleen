@@ -6,6 +6,34 @@ add_extra() {  # name label kb kind target note [guard]
   add_item extras "$2" "$3" "$4" "$5" "$6 · id: $1" "$flag" "${7:-}"
 }
 
+# Catalog entry type for extras that are plain folders:
+# extra ID LABEL PATH... [while=PROCESS] [note=TEXT]
+extra() {
+  [[ $CATALOG_PASS == (extras|claims) ]] || return 0
+  local id=$1 label=$2 a guard= note= p
+  local -a paths dirs
+  shift 2
+  for a in "$@"; do
+    case $a in
+      while=*) guard=${a#while=} ;;
+      note=*)  note=${a#note=} ;;
+      *)       paths+=($a) ;;
+    esac
+  done
+  if [[ $CATALOG_PASS == claims ]]; then
+    claim_paths $paths
+    return 0
+  fi
+  for p in $paths; do
+    p=${(e)p}; p=${p/#\~/$HOME}
+    [[ -n $p && -d $p ]] && ! untouchable $p && dirs+=($p)
+  done
+  (( $#dirs )) || return 0
+  local kb=$(kb_of $dirs)
+  (( kb >= 10240 )) || return 0
+  add_extra $id $label $kb rm "${(F)dirs}" "${note:-deleted}" $guard
+}
+
 extra_ios_simulators() {
   xcrun --find simctl >/dev/null 2>&1 || return
   local devices=$HOME/Library/Developer/CoreSimulator/Devices kb=0 line
@@ -98,6 +126,7 @@ extra_docker_unused() {
 collect_extras() {
   progress "Measuring optional extras…"
   (( $#PROJECT_ROOTS )) || detect_project_roots
+  load_catalog extras
   extra_ios_simulators
   extra_chrome_ai_model
   extra_claude_vm
