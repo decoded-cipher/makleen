@@ -1,0 +1,79 @@
+#!/bin/zsh
+# makkili: find what is eating disk space on a dev Mac, pick what to clean, reclaim it safely.
+#
+# Usage:
+#   makkili                          scan, then pick what to clean from a checklist
+#   makkili scan [CATEGORY...]       print a report and exit, nothing is changed
+#   makkili clean [CATEGORY...]      scan + checklist for the given categories
+#
+# Categories: caches
+#
+# Options:
+#   --only TEXT   preselect only items whose name or path contains TEXT
+#   --dry-run     show what would be cleaned and stop
+#   --yes         skip the checklist and confirmation, clean the default selection
+#   --all         scan: list every item
+#
+# Checklist keys: up/down or j/k move, space selects, a toggles the section, enter continues, q quits
+#
+# Config: ~/.config/makkili/config.zsh (plain zsh)
+
+emulate zsh
+setopt extended_glob null_glob pipefail
+# String widths (bars, …) are counted in characters only under a UTF-8 locale.
+[[ ${LC_ALL:-${LC_CTYPE:-$LANG}} == *[Uu][Tt][Ff]-#8* ]] || export LC_CTYPE=en_US.UTF-8
+zmodload zsh/datetime
+zmodload -F zsh/stat b:zstat
+
+VERSION=0.2.0
+SCRIPT=${0:A}
+LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the real script, not a symlink
+CONFIG_FILE=${MAKKILI_CONFIG:-$HOME/.config/makkili/config.zsh}
+
+# ---- defaults, overridden by $CONFIG_FILE ----
+NEVER_TOUCH=('*claude*' '*anthropic*')  # lowercase globs: matching paths are never reported, moved or deleted
+UNUSED_APP_DAYS=90
+[[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
+
+# The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makkili.
+for part in common caches scan report checklist clean; do
+  source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makkili: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
+done
+unset part
+
+usage() { sed -n '2,/^$/s/^# \{0,1\}//p' $SCRIPT }
+
+main() {
+  local cmd= a
+  case ${1:-} in
+    scan|clean) cmd=$1; shift ;;
+    help|-h|--help) usage; return ;;
+    version|--version) say "makkili $VERSION"; return ;;
+  esac
+  CATS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0
+  local -a args
+  while (( $# )); do
+    case $1 in
+      --only)       ONLY=$2; shift ;;
+      --dry-run|-n) DRY_RUN=1 ;;
+      --yes|-y)     ASSUME_YES=1 ;;
+      --all)        SHOW_ALL=1 ;;
+      -*)           die "unknown option: $1" ;;
+      *)            args+=($1) ;;
+    esac
+    shift
+  done
+  if [[ -z $cmd ]]; then  # plain `makkili`: checklist in a terminal, report otherwise
+    if (( ASSUME_YES || DRY_RUN )) || [[ -t 0 && -t 1 ]]; then cmd=clean; else cmd=scan; fi
+  fi
+  case $cmd in
+    scan|clean)
+      for a in $args; do (( ${ALL_CATEGORIES[(Ie)$a]} )) || die "unknown category: $a (use: $ALL_CATEGORIES)"; done
+      (( $#args )) && CATS=($args) || CATS=($ALL_CATEGORIES)
+      collect_all
+      if [[ $cmd == scan ]]; then print_report; else do_clean; fi
+      ;;
+  esac
+}
+
+main "$@"
