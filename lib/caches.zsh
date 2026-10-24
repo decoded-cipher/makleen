@@ -4,7 +4,7 @@
 
 # cache LABEL PATH... [run=COMMAND] [needs=TOOL] [while=PROCESS] [note=TEXT] [off]
 cache() {
-  [[ $CATALOG_PASS == caches ]] || return 0
+  [[ $CATALOG_PASS == (caches|claims) ]] || return 0
   local label=$1 a run= needs= guard= note= flag= p
   local -a paths dirs
   shift
@@ -18,6 +18,10 @@ cache() {
       *)       paths+=($a) ;;
     esac
   done
+  if [[ $CATALOG_PASS == claims ]]; then
+    claim_paths $paths
+    return 0
+  fi
   [[ -z $needs ]] || has $needs || return 0
   for p in $paths; do
     p=${(e)p}; p=${p/#\~/$HOME}  # single-quoted paths are expanded only now

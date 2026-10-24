@@ -157,6 +157,7 @@ collect_leftovers() {
   index_installed
   progress "Reading the LaunchServices registry…"
   index_launchservices
+  load_claims
   typeset -A g_kb g_paths g_state g_why
   local loc full sat kb label
   for loc in $LEFTOVER_PRIMARY $LEFTOVER_SATELLITE; do
@@ -164,6 +165,7 @@ collect_leftovers() {
     progress "Scanning ~/Library/$loc…"
     for full in "$HOME/Library/$loc"/*; do
       [[ $loc == "Application Support" && ${full:t} == Caches ]] && continue  # scanned as its own location
+      [[ -n ${CLAIMED[$full]} ]] && continue  # a catalogued cache, reported under caches
       classify_entry $loc ${full:t} $full $sat
       [[ $CL_STATE == (orphan|review) ]] || continue
       kb=$(kb_of $full)

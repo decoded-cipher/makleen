@@ -92,6 +92,19 @@ load_catalog() {  # pass
   [[ -r $USER_CATALOG ]] && source $USER_CATALOG
 }
 
+# Folders the catalog covers, so the leftovers scan doesn't report them a second time.
+# Paths that need a command to work out ('$(…)') are left out rather than run here.
+typeset -A CLAIMED
+claim_paths() {
+  local p
+  for p in "$@"; do [[ $p == *'$'* ]] || CLAIMED[${p/#\~/$HOME}]=1; done
+}
+load_claims() {
+  [[ -n ${CLAIMED[_done]} ]] && return
+  CLAIMED[_done]=1
+  load_catalog claims
+}
+
 # Refuse anything protected or not at least two levels below $HOME.
 safe_path() { [[ ${1:a} == $HOME/?*/?* ]] && ! untouchable $1 }
 
