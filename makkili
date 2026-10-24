@@ -6,10 +6,11 @@
 #   makkili scan [CATEGORY...]       print a report and exit, nothing is changed
 #   makkili clean [CATEGORY...]      scan + checklist for the given categories
 #
-# Categories: caches
+# Categories: caches projects
 #
 # Options:
 #   --only TEXT   preselect only items whose name or path contains TEXT
+#   --days N      projects count as idle after N days without use
 #   --dry-run     show what would be cleaned and stop
 #   --yes         skip the checklist and confirmation, clean the default selection
 #   --all         scan: list every item
@@ -31,12 +32,15 @@ LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the
 CONFIG_FILE=${MAKKILI_CONFIG:-$HOME/.config/makkili/config.zsh}
 
 # ---- defaults, overridden by $CONFIG_FILE ----
+INACTIVE_DAYS=60
+PROJECT_ROOTS=()      # empty: any folder in ~ that holds several git repos
+PROTECT=()            # glob patterns of project paths whose artifacts are never touched
 NEVER_TOUCH=('*claude*' '*anthropic*')  # lowercase globs: matching paths are never reported, moved or deleted
 UNUSED_APP_DAYS=90
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
 
 # The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makkili.
-for part in common caches scan report checklist clean; do
+for part in common caches projects scan report checklist clean; do
   source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makkili: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
 done
 unset part
@@ -55,6 +59,7 @@ main() {
   while (( $# )); do
     case $1 in
       --only)       ONLY=$2; shift ;;
+      --days)       INACTIVE_DAYS=$2; shift ;;
       --dry-run|-n) DRY_RUN=1 ;;
       --yes|-y)     ASSUME_YES=1 ;;
       --all)        SHOW_ALL=1 ;;

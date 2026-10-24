@@ -1,12 +1,14 @@
 # makkili: categories, the item table and shared helpers. Sourced by the makkili entry script.
 
-ALL_CATEGORIES=(caches)
+ALL_CATEGORIES=(caches projects)
 typeset -A CATEGORY_NAME CATEGORY_HINT
 CATEGORY_NAME=(
   caches    "Tool caches"
+  projects  "Build folders in idle projects"
 )
 CATEGORY_HINT=(
   caches    "deleted, rebuild themselves"
+  projects  "deleted, reinstall/rebuild to restore"
 )
 
 if [[ -t 1 ]]; then
