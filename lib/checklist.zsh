@@ -55,16 +55,18 @@ tui_move() {
 
 tui_draw() {
   local -a out targets
-  local list_h=$(( TUI_H - 7 )) r row cat i mark label right hint pad w total=0 d1 d2 tag tagc e=
+  local list_h=$(( TUI_H - 7 )) r row cat i mark label right hint pad w total=0 qkb=0 d1 d2 tag tagc e=
   (( CUR < TOP )) && TOP=$CUR
   (( CUR >= TOP + list_h )) && TOP=$(( CUR - list_h + 1 ))
 
   for (( i = 1; i <= $#I_CAT; i++ )); do
     (( PICK[i] )) || continue
     (( total += I_KB[i] ))
+    [[ $I_KIND[i] == quarantine ]] && (( qkb += I_KB[i] ))
   done
   out+=(" ${BOLD}makkili${RESET}  ${DIM}$DISK_LINE${RESET}")
   label=" Selected ${BOLD}$(human $total)${RESET} ${DIM}of $FOUND_HUMAN found"
+  (( qkb )) && label+=" · $(human $qkb) of it goes to quarantine first"
   out+=("$label$RESET" "")
 
   for (( r = TOP; r < TOP + list_h; r++ )); do

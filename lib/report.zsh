@@ -37,6 +37,8 @@ print_report() {
 
   say ""
   (( ACTIVE_KB )) && say " ${DIM}Kept: $(human $ACTIVE_KB) of build folders in projects used in the last $INACTIVE_DAYS days${RESET}"
+  local q=$(kb_of $QUARANTINE_DIR)
+  (( q )) && say " ${DIM}Quarantine holds $(human $q). Free it with \`makkili purge\`.${RESET}"
   for row in $SKIPPED; do say " ${DIM}Note: $row${RESET}"; done
   if (( $#UNUSED_APPS )); then
     say ""

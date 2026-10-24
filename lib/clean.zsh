@@ -3,6 +3,20 @@
 # Warnings while cleaning an item go to the terminal and into that item's log entry.
 item_warn() { print -ru2 -- "makkili: $*"; details+=("warning: $*") }
 
+quarantine_path() {
+  local src=$1 dest
+  [[ -e $src || -L $src ]] || return 0
+  safe_path $src || { item_warn "refusing to move $src"; return 1 }
+  if [[ -z $BATCH ]]; then
+    BATCH=$QUARANTINE_DIR/$(strftime %Y%m%d-%H%M%S $EPOCHSECONDS)
+    mkdir -p $BATCH
+  fi
+  dest=$BATCH$src
+  mkdir -p ${dest:h} && mv -- $src $dest 2>/dev/null ||
+    { item_warn "could not move $src (macOS may protect it; Full Disk Access helps)"; return 1 }
+  print -r -- $src >> $BATCH/MANIFEST
+}
+
 execute_item() {  # index position count
   local i=$1 t head out rc good=0 bad=0 result
   local -a details
@@ -23,6 +37,10 @@ execute_item() {  # index position count
         else
           item_warn "could not fully delete $t"; (( bad++ ))
         fi
+      done ;;
+    quarantine)
+      for t in ${(f)I_TARGET[i]}; do
+        if quarantine_path $t; then details+=("quarantined ${t/#$HOME/$TILDE}"); (( good++ )); else (( bad++ )); fi
       done ;;
     cmd)
       details+=("ran: $I_TARGET[i]")
@@ -84,12 +102,18 @@ do_clean() {
   log "cleaning $(human $total) in ${#sel} item(s)"
   log ""
   local before=$(free_kb) k=0
+  BATCH=
   say ""
   for i in $sel; do execute_item $i $(( ++k )) $#sel; done
   local after=$(free_kb)
   log ""
   log "free space: $(human $before) → $(human $after)"
+  [[ -n $BATCH ]] && log "quarantine batch: ${BATCH:t}"
   say ""
   say " ${BOLD}Free space: $(human $before) → $(human $after)${RESET}"
+  if [[ -n $BATCH ]]; then
+    say " ${DIM}Leftovers went to quarantine (${BATCH:t}) and still take space until purged."
+    say " Undo: makkili restore ${BATCH:t}   ·   free it: makkili purge --all${RESET}"
+  fi
   say " ${DIM}Log: ${LOG_FILE/#$HOME/$TILDE}${RESET}"
 }

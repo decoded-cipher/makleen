@@ -5,15 +5,18 @@
 #   makkili                          scan, then pick what to clean from a checklist
 #   makkili scan [CATEGORY...]       print a report and exit, nothing is changed
 #   makkili clean [CATEGORY...]      scan + checklist for the given categories
+#   makkili quarantine               list quarantined batches
+#   makkili restore BATCH            put a quarantined batch back
+#   makkili purge [--older-than N | --all]
 #
-# Categories: caches projects
+# Categories: leftovers caches projects
 #
 # Options:
 #   --only TEXT   preselect only items whose name or path contains TEXT
 #   --days N      projects count as idle after N days without use
 #   --dry-run     show what would be cleaned and stop
 #   --yes         skip the checklist and confirmation, clean the default selection
-#   --all         scan: list every item
+#   --all         scan: list every item; purge: purge every batch
 #
 # Checklist keys: up/down or j/k move, space selects, a toggles the section, enter continues, q quits
 #
@@ -28,19 +31,24 @@ zmodload -F zsh/stat b:zstat
 
 VERSION=0.2.0
 SCRIPT=${0:A}
+STATE_DIR=${MAKKILI_HOME:-$HOME/.makkili}
+QUARANTINE_DIR=$STATE_DIR/quarantine
 LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the real script, not a symlink
 CONFIG_FILE=${MAKKILI_CONFIG:-$HOME/.config/makkili/config.zsh}
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 # ---- defaults, overridden by $CONFIG_FILE ----
 INACTIVE_DAYS=60
 PROJECT_ROOTS=()      # empty: any folder in ~ that holds several git repos
 PROTECT=()            # glob patterns of project paths whose artifacts are never touched
+LEFTOVER_IGNORE=()    # glob patterns of ~/Library entry names never reported as leftovers
 NEVER_TOUCH=('*claude*' '*anthropic*')  # lowercase globs: matching paths are never reported, moved or deleted
 UNUSED_APP_DAYS=90
+QUARANTINE_DAYS=14
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
 
 # The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makkili.
-for part in common caches projects scan report checklist clean; do
+for part in common leftovers caches projects scan report checklist clean quarantine; do
   source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makkili: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
 done
 unset part
@@ -50,19 +58,20 @@ usage() { sed -n '2,/^$/s/^# \{0,1\}//p' $SCRIPT }
 main() {
   local cmd= a
   case ${1:-} in
-    scan|clean) cmd=$1; shift ;;
+    scan|clean|quarantine|restore|purge) cmd=$1; shift ;;
     help|-h|--help) usage; return ;;
     version|--version) say "makkili $VERSION"; return ;;
   esac
-  CATS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0
+  CATS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0 PURGE_ALL=0 PURGE_DAYS=$QUARANTINE_DAYS
   local -a args
   while (( $# )); do
     case $1 in
       --only)       ONLY=$2; shift ;;
       --days)       INACTIVE_DAYS=$2; shift ;;
+      --older-than) PURGE_DAYS=$2; shift ;;
       --dry-run|-n) DRY_RUN=1 ;;
       --yes|-y)     ASSUME_YES=1 ;;
-      --all)        SHOW_ALL=1 ;;
+      --all)        SHOW_ALL=1 PURGE_ALL=1 ;;
       -*)           die "unknown option: $1" ;;
       *)            args+=($1) ;;
     esac
@@ -78,6 +87,9 @@ main() {
       collect_all
       if [[ $cmd == scan ]]; then print_report; else do_clean; fi
       ;;
+    quarantine) cmd_quarantine ;;
+    restore)    cmd_restore ${args[1]:-} ;;
+    purge)      cmd_purge ;;
   esac
 }
 
