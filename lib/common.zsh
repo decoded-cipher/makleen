@@ -89,6 +89,7 @@ untouchable() {
 load_catalog() {  # pass
   local CATALOG_PASS=$1
   source $CATALOG_FILE
+  [[ -r $USER_CATALOG ]] && source $USER_CATALOG
 }
 
 # Refuse anything protected or not at least two levels below $HOME.

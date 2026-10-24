@@ -1,4 +1,5 @@
 # makkili catalog: the caches makkili knows about, one line each.
+# Add your own in ~/.config/makkili/catalog.zsh, in the same format; it is loaded after this file.
 #
 #   cache LABEL PATH... [run=COMMAND] [needs=TOOL] [while=PROCESS] [note=TEXT] [off]
 #   editor NAME SUPPORT_DIR EXTENSIONS_DIR while=PROCESS
