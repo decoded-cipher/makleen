@@ -176,7 +176,8 @@ collect_leftovers() {
   index_launchservices
   load_claims
   typeset -A g_kb g_paths g_state g_why
-  local loc full sat kb label
+  local loc full sat kb label fda=1 suffix=" (app container)"
+  has_fda || fda=0
   for loc in $LEFTOVER_PRIMARY $LEFTOVER_SATELLITE; do
     sat=$(( ${LEFTOVER_SATELLITE[(Ie)$loc]} > 0 ))
     progress "Scanning ~/Library/$loc…"
@@ -187,6 +188,8 @@ collect_leftovers() {
       [[ $CL_STATE == (orphan|review) ]] || continue
       kb=$(kb_of $full)
       label=$CL_LABEL
+      # macOS refuses to move ~/Library/Containers without Full Disk Access: keep those apart
+      (( fda )) || [[ $full != $HOME/Library/Containers/* ]] || label+=$suffix
       g_kb[$label]=$(( ${g_kb[$label]:-0} + kb ))
       g_paths[$label]+=$full$'\n'
       [[ $CL_STATE == review || -z ${g_state[$label]} ]] && g_state[$label]=$CL_STATE
@@ -194,23 +197,28 @@ collect_leftovers() {
     done
   done
   # Apps under 1 MB are folded into one line per state so the list stays readable.
-  local -a paths tiny_paths tiny_names tiny_rpaths tiny_rnames
-  local tiny_kb=0 tiny_rkb=0
+  local -a paths tiny_paths tiny_names tiny_rpaths tiny_rnames tiny_cpaths tiny_cnames
+  local tiny_kb=0 tiny_rkb=0 tiny_ckb=0 guard need_fda="macOS lets makkili move app containers only with Full Disk Access"
   for label in ${(k)g_kb}; do
     paths=(${(f)g_paths[$label]})
     if (( ${g_kb[$label]} < 1024 )); then
-      if [[ ${g_state[$label]} == orphan ]]; then
+      if [[ $label == *$suffix ]]; then
+        tiny_cpaths+=($paths) tiny_cnames+=(${label%$suffix}); (( tiny_ckb += ${g_kb[$label]} ))
+      elif [[ ${g_state[$label]} == orphan ]]; then
         tiny_paths+=($paths) tiny_names+=($label); (( tiny_kb += ${g_kb[$label]} ))
       else
         tiny_rpaths+=($paths) tiny_rnames+=($label); (( tiny_rkb += ${g_kb[$label]} ))
       fi
       continue
     fi
+    guard=; [[ $label == *$suffix ]] && guard=@fda
     add_item leftovers "$label" "${g_kb[$label]}" quarantine "${(F)paths}" \
-      "${g_why[$label]} · ${#paths} path(s)" "${${g_state[$label]}:#orphan}"
+      "${g_why[$label]} · ${#paths} path(s)${guard:+ · $need_fda}" "${${g_state[$label]}:#orphan}" "$guard"
   done
-  (( $#tiny_names )) && add_item leftovers "Small leftovers of ${#tiny_names} apps" $tiny_kb quarantine \
+  (( $#tiny_names )) && add_item leftovers "Small leftovers of ${#tiny_names} app${${tiny_names[2]:+s}}" $tiny_kb quarantine \
     "${(F)tiny_paths}" "${(j:, :)${(@oi)tiny_names}}"
   (( $#tiny_rnames )) && add_item leftovers "Small unidentified leftovers (${#tiny_rnames})" $tiny_rkb quarantine \
     "${(F)tiny_rpaths}" "${(j:, :)${(@oi)tiny_rnames}}" review
+  (( $#tiny_cnames )) && add_item leftovers "Small leftovers in app containers (${#tiny_cnames})" $tiny_ckb quarantine \
+    "${(F)tiny_cpaths}" "$need_fda · ${(j:, :)${(@oi)tiny_cnames}}" "" @fda
 }

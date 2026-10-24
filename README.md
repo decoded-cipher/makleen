@@ -83,8 +83,12 @@ that macOS remembers as once installed, it also looks in `Preferences`, `Saved A
 A folder is reported only when no installed app owns it. makkili compares each folder with the bundle ID,
 name, executable and vendor of every installed app, matches group containers by the app's team ID, and
 treats folders named after an installed command-line tool as that tool's data. Apple's own folders are
-always skipped. Folders are grouped per app, and apps with less than 1 MB of leftovers are folded into one
-line.
+always skipped: a folder is Apple's when macOS ships a framework, app, daemon or launch job of that name,
+or when it is on a short built-in list. Folders the catalog covers are reported as caches instead.
+Folders are grouped per app, and apps with less than 1 MB of leftovers are folded into one line.
+
+macOS won't let other apps move folders in `~/Library/Containers` unless your terminal has Full Disk
+Access. Without it, leftovers there are listed separately as *(app container)* and can't be selected.
 
 Each leftover is either confirmed or marked **check first**:
 
@@ -344,7 +348,8 @@ file, and `MAKKILI_HOME` moves the state folder (default `~/.makkili`, which hol
 - Leftover detection is a judgement made from installed apps and what macOS remembers. It has only been
   tested on one Mac, which is why leftovers are quarantined rather than deleted.
 - Without Full Disk Access for your terminal, Mail, Messages, Photos, Safari and the Trash can't be
-  measured. makkili doesn't clean those anyway, but the report says so.
+  measured, and leftovers in app containers can't be moved. makkili doesn't clean those personal folders
+  anyway, but the report says so. Moving app containers with Full Disk Access hasn't been tested.
 - System-wide leftovers outside your home folder, such as files in `/etc` or `/Library` left by an
   uninstaller, are out of scope because makkili never uses `sudo`.
 - Docker's build cache and unused images are measured only while Docker is running.

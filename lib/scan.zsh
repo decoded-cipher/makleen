@@ -45,7 +45,9 @@ init_selection() {
   local i cat needle=${(L)ONLY} procs=$(ps -axo command=)
   for (( i = 1; i <= $#I_CAT; i++ )); do
     PICK[i]=0 LOCK[i]=
-    if [[ -n $I_GUARD[i] && $procs == *"$I_GUARD[i]"* ]]; then LOCK[i]="in use"; continue; fi
+    if [[ $I_GUARD[i] == @fda ]]; then  # a condition, not a process name
+      has_fda || { LOCK[i]="needs Full Disk Access"; continue }
+    elif [[ -n $I_GUARD[i] && $procs == *"$I_GUARD[i]"* ]]; then LOCK[i]="in use"; continue; fi
     if [[ -n $ONLY ]]; then
       [[ ${(L)I_LABEL[i]} == *$needle* || ${(L)I_TARGET[i]} == *$needle* ]] && PICK[i]=1
     else

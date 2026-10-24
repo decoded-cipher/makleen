@@ -43,6 +43,7 @@ progress()      { [[ -t 2 ]] && print -nru2 -- $'\r\e[K'"  ${DIM}$*${RESET}" }
 progress_done() { [[ -t 2 ]] && print -nu2 -- $'\r\e[K' }
 has()     { (( $+commands[$1] )) }
 running() { local procs=$(ps -axo command=); [[ $procs == *"$1"* ]] }  # pgrep -f misses full app paths
+has_fda() { ls $HOME/Library/Mail >/dev/null 2>&1 }  # Full Disk Access for this terminal
 norm()    { REPLY=${(L)1}; REPLY=${REPLY//[^a-z0-9]/} }
 kb_of()   { (( $# )) || { print 0; return }; du -skx -- "$@" 2>/dev/null | awk '{ s += $1 } END { print s + 0 }' }
 human() {

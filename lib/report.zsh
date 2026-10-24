@@ -47,9 +47,10 @@ print_report() {
       printf "   %9s  %s  ${DIM}%sd${RESET}\n" "$(human ${row%%$'\t'*})" "${${row#*$'\t'}%$'\t'*}" "${row##*$'\t'}"
     done
   fi
-  if ! ls $HOME/Library/Mail >/dev/null 2>&1; then
+  if ! has_fda; then
     say ""
-    say " ${DIM}No Full Disk Access: Mail, Messages, Photos, Safari and the Trash were not measured."
-    say " Grant it in System Settings → Privacy & Security → Full Disk Access.${RESET}"
+    say " ${DIM}No Full Disk Access: Mail, Messages, Photos, Safari and the Trash were not measured, and"
+    say " leftovers in app containers can't be moved. Grant it to your terminal in"
+    say " System Settings → Privacy & Security → Full Disk Access.${RESET}"
   fi
 }
