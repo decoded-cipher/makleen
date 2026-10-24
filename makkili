@@ -36,6 +36,7 @@ STATE_DIR=${MAKKILI_HOME:-$HOME/.makkili}
 QUARANTINE_DIR=$STATE_DIR/quarantine
 LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the real script, not a symlink
 CONFIG_FILE=${MAKKILI_CONFIG:-$HOME/.config/makkili/config.zsh}
+CATALOG_FILE=${SCRIPT:h}/catalog.zsh
 AGENT_LABEL=dev.makkili.weekly
 AGENT_PLIST=$HOME/Library/LaunchAgents/$AGENT_LABEL.plist
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister

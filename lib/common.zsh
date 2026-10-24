@@ -85,6 +85,12 @@ untouchable() {
   return 1
 }
 
+# Run the catalog's entries for one pass; each entry type only acts in its own pass.
+load_catalog() {  # pass
+  local CATALOG_PASS=$1
+  source $CATALOG_FILE
+}
+
 # Refuse anything protected or not at least two levels below $HOME.
 safe_path() { [[ ${1:a} == $HOME/?*/?* ]] && ! untouchable $1 }
 
