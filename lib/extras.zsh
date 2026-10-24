@@ -87,29 +87,77 @@ extra_ollama_models() {
     "ollama list | awk 'NR > 1 { print \$1 }' | xargs -n1 ollama rm" "re-pull with \`ollama pull <model>\`"
 }
 
+# Node versions installed by nvm, fnm, Volta, asdf or mise. Kept: each manager's default and newest
+# version, the node on PATH, and versions pinned by .nvmrc, .node-version or .tool-versions in your
+# projects or home folder. An exact pin keeps that version; "22" keeps the newest 22.x of each manager.
 extra_old_node() {
-  local base=$HOME/.nvm/versions/node f w v
-  local -a versions=($base/v*(/n)) wanted keep drop newest
-  (( $#versions > 1 )) || return
+  local fnm_dir=${FNM_DIR:-$HOME/.local/share/fnm} volta=${VOLTA_HOME:-$HOME/.volta}
+  local -a spec=(
+    nvm   $HOME/.nvm/versions/node
+    fnm   $fnm_dir/node-versions
+    fnm   "$HOME/Library/Application Support/fnm/node-versions"
+    volta $volta/tools/image/node
+    asdf  ${ASDF_DATA_DIR:-$HOME/.asdf}/installs/nodejs
+    mise  ${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs/node
+  )
+  local i d f w link line
+  local -a all managers wanted keep drop mine
+  typeset -A mgr_of
+  for (( i = 1; i < $#spec; i += 2 )); do
+    for d in $spec[i+1]/*(/n); do
+      [[ ${d:t} == v#<->.<->.<-> ]] || continue
+      all+=($d); mgr_of[$d]=$spec[i]
+    done
+  done
+  (( $#all > 1 )) || return
+  managers=(${(u)${(@v)mgr_of}})
+
+  # defaults
   [[ -r $HOME/.nvm/alias/default ]] && wanted+=($(<$HOME/.nvm/alias/default))
-  for f in ${(f)"$(find $PROJECT_ROOTS -maxdepth 4 \( -name node_modules -o -name .git \) -prune -o \
-                  \( -name .nvmrc -o -name .node-version \) -type f -print 2>/dev/null)"}; do
-    wanted+=($(<$f))
+  line=$(grep -o '"runtime": *"[^"]*"' $volta/tools/user/platform.json 2>/dev/null | head -1)
+  [[ -n $line ]] && wanted+=(${line//[^0-9.]/})
+  line=$(grep -E '^[[:space:]]*node(js)?[[:space:]]*=' $HOME/.config/mise/config.toml 2>/dev/null | head -1)
+  [[ -n $line ]] && wanted+=(${line//[^0-9.]/})
+  for link in $fnm_dir/aliases/default "$HOME/Library/Application Support/fnm/aliases/default"; do
+    [[ -e $link ]] || continue
+    d=${link:A}; [[ ${d:t} == installation ]] && d=${d:h}
+    keep+=($d)
   done
-  for w in $wanted; do  # exact pins are kept as is; "22" keeps the newest installed 22.x
+  # pins in your projects and home folder
+  for f in $HOME/.nvmrc(N) $HOME/.node-version(N) $HOME/.tool-versions(N) ${(f)"$(find $PROJECT_ROOTS -maxdepth 4 \
+             \( -name node_modules -o -name .git \) -prune -o \( -name .nvmrc -o -name .node-version -o -name .tool-versions \) \
+             -type f -print 2>/dev/null)"}; do
+    if [[ ${f:t} == .tool-versions ]]; then
+      wanted+=(${${(M)${(f)"$(<$f)"}:#(nodejs|node) *}#* })
+    else
+      wanted+=($(<$f))
+    fi
+  done
+  for w in $wanted; do
     w=${w#v}
-    if [[ $w == <->.<->.<-> ]]; then [[ -d $base/v$w ]] && keep+=($base/v$w); continue; fi
-    w=${w%%.*}
-    [[ $w == <-> ]] || continue
-    newest=($base/v$w.*(/nOn))
-    (( $#newest )) && keep+=($newest[1])
+    if [[ $w == <->.<->.<-> ]]; then
+      for d in $all; do [[ ${${d:t}#v} == $w ]] && keep+=($d); done
+    elif [[ ${w%%.*} == <-> ]]; then
+      for i in $managers; do
+        mine=(); for d in $all; do [[ $mgr_of[$d] == $i && ${${d:t}#v} == ${w%%.*}.* ]] && mine+=($d); done
+        (( $#mine )) && keep+=(${${(@On)mine}[1]})
+      done
+    fi
   done
-  [[ $commands[node] == $base/* ]] && keep+=(${commands[node]%/bin/node})
-  (( $#keep )) || keep=($versions[-1])
-  for v in $versions; do (( ${keep[(Ie)$v]} )) || drop+=($v); done
+  # the node on PATH, and each manager's newest version
+  for d in $all; do [[ ${commands[node]:A} == $d/* ]] && keep+=($d); done
+  for i in $managers; do
+    mine=(); for d in $all; do [[ $mgr_of[$d] == $i ]] && mine+=($d); done
+    keep+=(${${(@On)mine}[1]})
+  done
+
+  for d in $all; do (( ${keep[(Ie)$d]} )) || drop+=($d); done
   (( $#drop )) || return
-  add_extra old-node-versions "Old Node versions: ${(j:, :)${(@)drop:t}}" $(kb_of $drop) rm "${(F)drop}" \
-    "keeps ${(j:, :)${(@u)keep:t}} (nvm default + .nvmrc/.node-version pins)"
+  local -a names kept
+  for d in $drop; do names+=("${d:t}${${managers[2]:+ ($mgr_of[$d])}}"); done
+  for d in ${(u)keep}; do kept+=("${d:t}${${managers[2]:+ ($mgr_of[$d])}}"); done
+  add_extra old-node-versions "Old Node versions: ${(j:, :)names}" $(kb_of $drop) rm "${(F)drop}" \
+    "keeps ${(j:, :)kept} (defaults, newest, the node on PATH, and pinned versions)"
 }
 
 extra_docker_unused() {
