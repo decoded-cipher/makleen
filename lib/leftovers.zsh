@@ -1,6 +1,20 @@
 # makkili: leftovers of uninstalled apps in ~/Library. Sourced by the makkili entry script.
 
-# Entries macOS keeps without a com.apple prefix (normalized), plus tool dirs that are never app data.
+# A plain folder name is Apple's when macOS ships a framework, app, daemon or launch job by that name.
+apple_component() {
+  local n=$1 f
+  for f in /System/Library/{Frameworks,PrivateFrameworks}/$n.framework /System/Library/CoreServices/$n.app \
+           /System/Applications/$n.app /System/Applications/Utilities/$n.app /usr/libexec/$n /usr/sbin/$n \
+           /System/Library/CoreServices/$n /System/Library/PrivateFrameworks/*.framework/Support/$n \
+           /System/Library/PrivateFrameworks/*.framework/Versions/A/Support/$n; do
+    [[ -e $f ]] && return 0
+  done
+  local -a jobs=(/System/Library/Launch{Agents,Daemons}/com.apple.(#i)$n.plist
+                 /System/Library/Launch{Agents,Daemons}/com.apple.*.(#i)$n.plist)
+  (( $#jobs ))
+}
+
+# Apple folders that apple_component can't recognise (normalized), plus tool dirs that are never app data.
 SYSTEM_NAMES=(addressbook animoji appstore assistant automator baseband callhistorydb callhistorytransactions
   cloudkit clouddocs contactsd controlcenter coresimulator crashreporter defaultstore defaultstoreshm
   defaultstorewal diagnosticreports differentialprivacy diskimages facetime familycircle fileprovider fsckhfs
@@ -133,6 +147,7 @@ classify_entry() {  # location entry fullpath satellite
   (( satellite )) && return
 
   # Plain folder names
+  apple_component $base && return
   [[ -n ${APP_TOKENS[$t]} ]] && { CL_STATE=installed; return }
   for i in ${(k)APP_TOKENS} ${VENDORS#*.}; do
     (( ${#i} >= 4 )) && [[ $t == $i* ]] && { CL_STATE=installed; return }  # BraveSoftware, vscode-cpptools
