@@ -13,7 +13,7 @@ LEFTOVER_PRIMARY=("Application Support" "Application Support/Caches" Caches Cont
 # Small per-bundle-id files; only reported when macOS remembers the id as an app that is now gone.
 LEFTOVER_SATELLITE=(Preferences "Saved Application State" HTTPStorages WebKit "Application Scripts" Cookies)
 
-typeset -A APP_IDS APP_TOKENS APP_TEAMS LS_IDS LS_NAMES LS_LIVE
+typeset -A APP_IDS APP_PATH_BY_ID APP_TOKENS APP_TEAMS LS_IDS LS_NAMES LS_LIVE
 typeset -a APP_PATHS VENDORS
 
 index_installed() {
@@ -28,6 +28,7 @@ index_installed() {
     id=$(plutil -extract CFBundleIdentifier raw -o - $plist 2>/dev/null)
     if [[ -n $id ]]; then
       APP_IDS[${(L)id}]=${app:t:r}
+      APP_PATH_BY_ID[${(L)id}]=$app
       parts=(${(s:.:)${(L)id}})
       VENDORS+=($parts[1].$parts[2])
     fi

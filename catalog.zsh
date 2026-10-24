@@ -65,6 +65,12 @@ cache "Android build caches"         ~/.android/build-cache ~/.android/cache
 # ---- Hardware ----
 cache "Arduino download staging"     ~/Library/Arduino15/staging
 
+# ---- Browsers (only the cache; history, logins and settings stay) ----
+cache "Chrome cache"                 ~/Library/Caches/Google/Chrome             while="Google Chrome.app/Contents/MacOS"
+cache "Brave cache"                  ~/Library/Caches/BraveSoftware/Brave-Browser while="Brave Browser.app/Contents/MacOS"
+cache "Edge cache"                   "~/Library/Caches/Microsoft Edge"          while="Microsoft Edge.app/Contents/MacOS"
+cache "Firefox cache"                ~/Library/Caches/Firefox/Profiles          while="Firefox.app/Contents/MacOS"
+
 # ---- Editors ----
 editor "VS Code"  "~/Library/Application Support/Code"     ~/.vscode/extensions     while="Visual Studio Code.app/Contents/MacOS"
 editor "Cursor"   "~/Library/Application Support/Cursor"   ~/.cursor/extensions     while="Cursor.app/Contents/MacOS"

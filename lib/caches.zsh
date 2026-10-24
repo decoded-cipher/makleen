@@ -63,6 +63,7 @@ collect_caches() {
   progress "Measuring tool caches…"
   load_catalog caches
   collect_jetbrains_caches
+  collect_app_caches
   collect_brew_cache
   collect_docker_cache
   collect_unavailable_simulators
@@ -91,6 +92,24 @@ collect_jetbrains_caches() {
   local kb=$(kb_of $stale)
   (( kb >= 10240 )) && add_item caches "JetBrains caches of old IDE versions" $kb rm "${(F)stale}" \
     "keeps the newest version of each IDE"
+}
+
+# Caches of installed apps in ~/Library/Caches/<bundle id>. Apps rebuild them, and each one can't
+# be selected while its app runs. Caches of apps that are gone are reported as leftovers instead.
+collect_app_caches() {
+  index_installed
+  load_claims
+  local d id app name kb
+  for d in $HOME/Library/Caches/*(/); do
+    id=${(L)d:t}
+    [[ $id == com.apple.* || -n ${CLAIMED[$d]} ]] && continue
+    app=${APP_PATH_BY_ID[$id]}
+    [[ -n $app ]] && ! untouchable $d || continue
+    kb=$(kb_of $d)
+    (( kb >= 51200 )) || continue  # 50 MB: smaller app caches aren't worth a line
+    name=${app:t:r}
+    add_item caches "$name cache" $kb rm $d "$name rebuilds it" "" "$app/Contents/MacOS"
+  done
 }
 
 # ---- caches whose size only the tool itself can tell ----
