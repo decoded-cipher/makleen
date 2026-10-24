@@ -126,13 +126,15 @@ the built-in catalog:
 ```zsh
 cache "My tool's cache"  ~/.mytool/cache
 cache "Other tool cache" ~/Library/Caches/othertool  run="othertool cache clear" needs=othertool
-extra big-models "Downloaded models" ~/models  note="downloaded again when needed"
+extra big-models "Downloaded models" ~/ml/models  note="downloaded again when needed"
 ```
 
 `run=` cleans with the tool's own command instead of deleting, `needs=` skips the line when that command
 isn't installed, `while=` locks the item while a matching process runs, `note=` explains it, and `off` makes
 it start unticked. An `extra` starts unticked unless its ID is listed in `EXTRAS`. A path in single quotes
 is expanded only when the line is used: `'$(go env GOMODCACHE)'` runs `go` only if it's installed.
+Folders must be at least two levels inside your home folder (`~/.tool/cache`, not `~/.tool`), and must
+not match `NEVER_TOUCH`; others are never offered.
 
 ### Build folders in idle projects
 
