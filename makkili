@@ -9,7 +9,7 @@
 #   makkili restore BATCH            put a quarantined batch back
 #   makkili purge [--older-than N | --all]
 #
-# Categories: leftovers caches projects
+# Categories: leftovers caches projects extras
 #
 # Options:
 #   --only TEXT   preselect only items whose name or path contains TEXT
@@ -41,6 +41,7 @@ LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchSe
 INACTIVE_DAYS=60
 PROJECT_ROOTS=()      # empty: any folder in ~ that holds several git repos
 PROTECT=()            # glob patterns of project paths whose artifacts are never touched
+EXTRAS=()             # extras selected by default in the checklist
 LEFTOVER_IGNORE=()    # glob patterns of ~/Library entry names never reported as leftovers
 NEVER_TOUCH=('*claude*' '*anthropic*')  # lowercase globs: matching paths are never reported, moved or deleted
 UNUSED_APP_DAYS=90
@@ -48,7 +49,7 @@ QUARANTINE_DAYS=14
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
 
 # The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makkili.
-for part in common leftovers caches projects scan report checklist clean quarantine; do
+for part in common leftovers caches projects extras scan report checklist clean quarantine; do
   source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makkili: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
 done
 unset part

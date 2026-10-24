@@ -1,16 +1,18 @@
 # makkili: categories, the item table and shared helpers. Sourced by the makkili entry script.
 
-ALL_CATEGORIES=(leftovers caches projects)
+ALL_CATEGORIES=(leftovers caches projects extras)
 typeset -A CATEGORY_NAME CATEGORY_HINT
 CATEGORY_NAME=(
   leftovers "Leftovers from uninstalled apps"
   caches    "Tool caches"
   projects  "Build folders in idle projects"
+  extras    "Optional extras"
 )
 CATEGORY_HINT=(
   leftovers "moved to quarantine, restorable"
   caches    "deleted, rebuild themselves"
   projects  "deleted, reinstall/rebuild to restore"
+  extras    "deleted, large optional items"
 )
 
 if [[ -t 1 ]]; then
