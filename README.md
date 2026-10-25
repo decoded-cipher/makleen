@@ -335,13 +335,16 @@ zsh.
 |---|---|---|
 | `INACTIVE_DAYS` | `60` | days without use before a project counts as idle |
 | `PROJECT_ROOTS` | auto-detected | folders to search for projects |
-| `PROTECT` | none | globs of project paths whose build folders are never touched |
+| `PROTECT` | none | globs of projects, or folders of projects, whose build folders are never touched |
 | `EXTRAS` | none | extras that start ticked, by ID |
 | `LEFTOVER_IGNORE` | none | globs of `~/Library` entry names never reported as leftovers |
-| `NEVER_TOUCH` | none | globs of paths never reported, moved or deleted; a pattern matches anywhere in the path, ignoring case |
+| `NEVER_TOUCH` | none | globs of paths never reported, moved or deleted, along with everything inside them; a pattern matches anywhere in the path |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
 | `QUARANTINE_DAYS` | `14` | age at which `makleen purge` deletes a batch |
 | `LOG_DIR` | `logs/` next to the script | where run logs go |
+
+Patterns ignore case, and in `PROTECT` and `NEVER_TOUCH` a leading `~` is your home folder. A bare name
+matches a folder of that name anywhere: `NEVER_TOUCH=(mkcert)` protects every `mkcert` folder and what's in it.
 
 Your own caches and extras go in `~/.config/makleen/catalog.zsh`; see [Tool caches](#tool-caches).
 

@@ -8,7 +8,7 @@ INACTIVE_DAYS=60
 # (Desktop, Documents and Downloads are skipped unless listed here).
 PROJECT_ROOTS=()
 
-# Projects whose artifacts are never touched (globs against the project path).
+# Projects, or folders of projects, whose artifacts are never touched (globs, any case).
 PROTECT=(
   # '*/work/mobile-app'
 )
@@ -26,11 +26,11 @@ PROTECT=(
 #   xcode-archives     Xcode archives of builds you made
 EXTRAS=()
 
-# ~/Library entry names never reported as leftovers (globs).
+# ~/Library entry names never reported as leftovers (globs, any case).
 LEFTOVER_IGNORE=()
 
-# Paths matching these globs are never reported, moved or deleted. Empty by default.
-# A pattern matches anywhere in the path, ignoring case, so keep it specific.
+# Paths matching these globs, and everything inside them, are never reported, moved or deleted.
+# Empty by default. A pattern matches anywhere in the path, ignoring case, so keep it specific.
 # NEVER_TOUCH=('*/.claude/*' '*/mkcert*')
 
 # Apps not opened in this many days are listed (report only).
