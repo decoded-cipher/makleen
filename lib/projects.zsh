@@ -75,11 +75,7 @@ last_activity() {  # project -> epoch of the latest sign of use
   REPLY=$t
 }
 
-is_protected() {
-  local pat
-  for pat in $PROTECT; do [[ $1 == ${~pat} || ${1/#$HOME/$TILDE} == ${~pat} ]] && return 0; done
-  return 1
-}
+is_protected() { path_matches $1 $PROTECT }
 
 # Folders in ~ holding at least two git repos within three levels. Desktop, Documents and Downloads
 # are skipped because touching them makes macOS ask for permission; add them to PROJECT_ROOTS yourself.
