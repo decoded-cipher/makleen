@@ -14,7 +14,7 @@
 # ---- JavaScript ----
 cache "npm cache"                    ~/.npm/_cacache                    run="npm cache clean --force" needs=npm
 cache "npx package cache"            ~/.npm/_npx
-cache "Bun install cache"            ~/.bun/install/cache               run="bun pm cache rm" needs=bun
+cache "Bun install cache"            '${BUN_INSTALL_CACHE_DIR:-${BUN_INSTALL:-$HOME/.bun}/install/cache}'
 cache "pnpm store, unused packages"  '$(pnpm store path 2>/dev/null)'   run="pnpm store prune" needs=pnpm
 cache "Yarn cache"                   '$(yarn cache dir 2>/dev/null)'    run="yarn cache clean" needs=yarn
 cache "Yarn Berry global cache"      ~/.yarn/berry/cache
