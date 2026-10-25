@@ -82,7 +82,7 @@ docker_up() {
 
 untouchable() {
   local pat
-  for pat in $NEVER_TOUCH; do [[ ${(L)1} == ${~pat} ]] && return 0; done
+  for pat in $NEVER_TOUCH; do [[ ${(L)1} == ${(L)~pat} ]] && return 0; done
   return 1
 }
 
