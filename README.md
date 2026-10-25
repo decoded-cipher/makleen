@@ -304,8 +304,8 @@ starts with your free space; clean and purge logs also end with it.
 03:26:45  done       4.1 GB  [caches] Docker build cache
                              ran: docker builder prune -af
                              │ Total reclaimed space: 4.091GB
-03:27:41  done       9.2 GB  [projects] Professional/elabel_mobile
-                             deleted ~/Developer/Professional/elabel_mobile/node_modules
+03:27:41  done       9.2 GB  [projects] work/mobile-app
+                             deleted ~/Developer/work/mobile-app/node_modules
 ```
 
 `scan` and `--dry-run` change nothing and write no log. The `logs/` folder is git-ignored because logs

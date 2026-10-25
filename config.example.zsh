@@ -10,7 +10,7 @@ PROJECT_ROOTS=()
 
 # Projects whose artifacts are never touched (globs against the project path).
 PROTECT=(
-  # '*/Professional/elabel_mobile'
+  # '*/work/mobile-app'
 )
 
 # Optional extras preselected in the checklist (the rest are listed but unticked).
