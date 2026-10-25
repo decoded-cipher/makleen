@@ -389,6 +389,10 @@ rm -rf ~/.makkili ~/.config/makkili ~/.local/bin/makkili
 
 Then delete the repo folder, including `logs/` if you don't want the history.
 
+## License
+
+[MIT](LICENSE)
+
 ---
 
 The name comes from Makkili, a comedy character in the Malayalam film *Varikkuzhiyile Kolapathakam*,
