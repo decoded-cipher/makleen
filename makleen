@@ -31,7 +31,7 @@ setopt extended_glob null_glob pipefail
 zmodload zsh/datetime
 zmodload -F zsh/stat b:zstat
 
-VERSION=0.2.0
+VERSION=0.2.1
 SCRIPT=${0:A}
 STATE_DIR=${MAKLEEN_HOME:-$HOME/.makleen}
 QUARANTINE_DIR=$STATE_DIR/quarantine
