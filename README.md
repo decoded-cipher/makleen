@@ -6,6 +6,8 @@ makleen scans your Mac for space it can reclaim: data left behind by apps you un
 build folders in projects you haven't touched in a while, and a few large optional items. It shows
 everything in a checklist, you tick what should go, and it cleans only that.
 
+It is about 65 KB of zsh with nothing to install or compile, so you can read every line before it runs.
+
 ```
  makleen  ██████████████░░░░░░  316.9 GB used · 124.8 GB free
  Selected 48.2 GB of 70.6 GB found
@@ -35,6 +37,7 @@ everything in a checklist, you tick what should go, and it cleans only that.
 - [Logs](#logs)
 - [Weekly report](#weekly-report)
 - [Configuration](#configuration)
+- [Compared with other cleaners](#compared-with-other-cleaners)
 - [Limitations](#limitations)
 - [Project layout](#project-layout)
 - [Uninstall](#uninstall)
@@ -344,6 +347,34 @@ Your own caches and extras go in `~/.config/makleen/catalog.zsh`; see [Tool cach
 
 Environment variables: `MAKLEEN_CONFIG` and `MAKLEEN_CATALOG` point at a different config or catalog
 file, and `MAKLEEN_HOME` moves the state folder (default `~/.makleen`, which holds the quarantine).
+
+## Compared with other cleaners
+
+Sizes are download sizes; sizes and prices were checked in October 2026.
+
+| Tool | What it is | Size | Price | Focus |
+|---|---|---|---|---|
+| makleen | zsh script | 65 KB | free, MIT | dev caches, idle projects' build folders, leftovers of deleted apps |
+| [CleanMyMac](https://cleanmymac.com) | app, plus a CLI preview | 346 MB | about $40 a year | general cleanup, uninstaller, malware scan; the CLI adds dev caches and old build folders |
+| [Mole](https://github.com/tw93/Mole) | CLI, shell and Go | about 8 MB | free, GPL-3.0 | caches, build folders, uninstaller, disk map, system tweaks |
+| [Pearcleaner](https://github.com/alienator88/Pearcleaner) | app | 11 MB | free, source-available | uninstaller with an orphaned-file search |
+| [AppCleaner](https://freemacsoft.net/appcleaner/) | app | 3–4 MB | free | uninstaller |
+| [DaisyDisk](https://daisydiskapp.com) | app | 3 MB | $9.99 | map of what uses space; you decide what to delete |
+| [DevCleaner for Xcode](https://apps.apple.com/app/id1388020431) | app with a CLI | 6 MB | free | Xcode's caches only |
+| [npkill](https://github.com/voidcosmos/npkill) | Node CLI | 135 KB, plus Node | free, MIT | `node_modules` only |
+| [kondo](https://github.com/tbillington/kondo) | Rust CLI | 1 MB | free, MIT | build folders in 20+ project types |
+
+Where makleen differs:
+
+- **Leftovers can be undone.** They go to a [quarantine](#quarantine) you can restore from. Mole's `clean` and
+  `purge` delete permanently.
+- **Idle means unused for a while.** A project counts as idle after 60 days without a commit, checkout or
+  build. CleanMyMac's and Mole's build-folder cleaners preselect anything without activity in the last 7 days.
+- **Nothing to trust blindly.** There is no binary and no installer, only shell code, and every command it
+  runs is shown in the checklist and the log.
+
+What it doesn't do: uninstall apps, map disk usage, empty the Trash, clean anything that needs `sudo`, or
+offer a GUI. For those, use one of the tools above.
 
 ## Limitations
 
