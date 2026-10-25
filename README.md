@@ -338,7 +338,7 @@ zsh.
 | `PROTECT` | none | globs of project paths whose build folders are never touched |
 | `EXTRAS` | none | extras that start ticked, by ID |
 | `LEFTOVER_IGNORE` | none | globs of `~/Library` entry names never reported as leftovers |
-| `NEVER_TOUCH` | none | lowercase globs of paths never reported, moved or deleted; a pattern matches anywhere in the path |
+| `NEVER_TOUCH` | none | globs of paths never reported, moved or deleted; a pattern matches anywhere in the path, ignoring case |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
 | `QUARANTINE_DAYS` | `14` | age at which `makleen purge` deletes a batch |
 | `LOG_DIR` | `logs/` next to the script | where run logs go |

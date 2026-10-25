@@ -49,7 +49,7 @@ PROJECT_ROOTS=()      # empty: any folder in ~ that holds several git repos
 PROTECT=()            # glob patterns of project paths whose artifacts are never touched
 EXTRAS=()             # extras selected by default in the checklist
 LEFTOVER_IGNORE=()    # glob patterns of ~/Library entry names never reported as leftovers
-NEVER_TOUCH=()        # lowercase globs: matching paths are never reported, moved or deleted
+NEVER_TOUCH=()        # globs, any case: matching paths are never reported, moved or deleted
 UNUSED_APP_DAYS=90
 QUARANTINE_DAYS=14
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE

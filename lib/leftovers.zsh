@@ -116,7 +116,7 @@ classify_entry() {  # location entry fullpath satellite
   norm $base; t=$REPLY
   [[ -z $t ]] && return
   (( ${SYSTEM_NAMES[(Ie)$t]} )) && return
-  for i in $LEFTOVER_IGNORE; do [[ $name == ${~i} ]] && return; done
+  for i in $LEFTOVER_IGNORE; do [[ ${(L)name} == ${(L)~i} ]] && return; done
 
   if [[ -n $team ]]; then
     index_teams

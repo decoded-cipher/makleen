@@ -80,11 +80,17 @@ docker_up() {
   [[ $DOCKER_STATE == up ]]
 }
 
-untouchable() {
-  local pat
-  for pat in $NEVER_TOUCH; do [[ ${(L)1} == ${~pat} ]] && return 0; done
+# The path, or a folder above it, matches one of the globs, ignoring case.
+path_matches() {  # path glob...
+  local p=${(L)1} pat
+  shift
+  for pat in "$@"; do
+    pat=${(L)${${pat/#\~/$HOME}%%/##}}
+    [[ $p == (|*/)${~pat}(|/*) || $p/ == ${~pat} ]] && return 0
+  done
   return 1
 }
+untouchable() { path_matches $1 $NEVER_TOUCH }
 
 # Run the catalog's entries for one pass; each entry type only acts in its own pass.
 load_catalog() {  # pass

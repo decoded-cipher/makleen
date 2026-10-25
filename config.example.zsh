@@ -29,8 +29,8 @@ EXTRAS=()
 # ~/Library entry names never reported as leftovers (globs).
 LEFTOVER_IGNORE=()
 
-# Paths matching these (lowercase globs) are never reported, moved or deleted. Empty by default.
-# A pattern matches anywhere in the path, so keep it specific.
+# Paths matching these globs are never reported, moved or deleted. Empty by default.
+# A pattern matches anywhere in the path, ignoring case, so keep it specific.
 # NEVER_TOUCH=('*/.claude/*' '*/mkcert*')
 
 # Apps not opened in this many days are listed (report only).
