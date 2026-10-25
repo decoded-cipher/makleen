@@ -112,6 +112,7 @@ classify_entry() {  # location entry fullpath satellite
   base=${base#group.}
   lower=${(L)base}
   [[ $lower == *com.apple* || $lower == apple* ]] && return
+  [[ $lower == is.workflow* ]] && return  # Shortcuts still uses the ids of Workflow, the app Apple bought
   norm $base; t=$REPLY
   [[ -z $t ]] && return
   (( ${SYSTEM_NAMES[(Ie)$t]} )) && return
