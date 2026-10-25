@@ -1,4 +1,4 @@
-# makkili: leftovers of uninstalled apps in ~/Library. Sourced by the makkili entry script.
+# makleen: leftovers of uninstalled apps in ~/Library. Sourced by the makleen entry script.
 
 # A plain folder name is Apple's when macOS ships a framework, app, daemon or launch job by that name.
 apple_component() {
@@ -198,7 +198,7 @@ collect_leftovers() {
   done
   # Apps under 1 MB are folded into one line per state so the list stays readable.
   local -a paths tiny_paths tiny_names tiny_rpaths tiny_rnames tiny_cpaths tiny_cnames
-  local tiny_kb=0 tiny_rkb=0 tiny_ckb=0 guard need_fda="macOS lets makkili move app containers only with Full Disk Access"
+  local tiny_kb=0 tiny_rkb=0 tiny_ckb=0 guard need_fda="macOS lets makleen move app containers only with Full Disk Access"
   for label in ${(k)g_kb}; do
     paths=(${(f)g_paths[$label]})
     if (( ${g_kb[$label]} < 1024 )); then

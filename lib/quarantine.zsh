@@ -1,4 +1,4 @@
-# makkili: quarantine listing, restore and purge. Sourced by the makkili entry script.
+# makleen: quarantine listing, restore and purge. Sourced by the makleen entry script.
 
 cmd_quarantine() {
   local b
@@ -12,7 +12,7 @@ cmd_quarantine() {
 cmd_restore() {
   local b=$QUARANTINE_DIR/$1 src left=0 kb
   local -a details
-  [[ -n $1 && -f $b/MANIFEST ]] || die "no such batch: ${1:-?} (see: makkili quarantine)"
+  [[ -n $1 && -f $b/MANIFEST ]] || die "no such batch: ${1:-?} (see: makleen quarantine)"
   kb=$(kb_of $b)
   log_open restore
   for src in ${(f)"$(<$b/MANIFEST)"}; do

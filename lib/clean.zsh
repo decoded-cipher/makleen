@@ -1,7 +1,7 @@
-# makkili: cleaning the selected items. Sourced by the makkili entry script.
+# makleen: cleaning the selected items. Sourced by the makleen entry script.
 
 # Warnings while cleaning an item go to the terminal and into that item's log entry.
-item_warn() { print -ru2 -- "makkili: $*"; details+=("warning: $*") }
+item_warn() { print -ru2 -- "makleen: $*"; details+=("warning: $*") }
 
 quarantine_path() {
   local src=$1 dest
@@ -113,7 +113,7 @@ do_clean() {
   say " ${BOLD}Free space: $(human $before) → $(human $after)${RESET}"
   if [[ -n $BATCH ]]; then
     say " ${DIM}Leftovers went to quarantine (${BATCH:t}) and still take space until purged."
-    say " Undo: makkili restore ${BATCH:t}   ·   free it: makkili purge --all${RESET}"
+    say " Undo: makleen restore ${BATCH:t}   ·   free it: makleen purge --all${RESET}"
   fi
   say " ${DIM}Log: ${LOG_FILE/#$HOME/$TILDE}${RESET}"
 }

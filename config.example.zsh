@@ -1,4 +1,4 @@
-# makkili config: copy to ~/.config/makkili/config.zsh and edit.
+# makleen config: copy to ~/.config/makleen/config.zsh and edit.
 # Plain zsh, sourced by the script.
 
 # Projects with no commit, checkout or build in this many days are "idle".
@@ -14,7 +14,7 @@ PROTECT=(
 )
 
 # Optional extras preselected in the checklist (the rest are listed but unticked).
-# Run `makkili scan extras` to see what each one would free.
+# Run `makleen scan extras` to see what each one would free.
 #   ios-simulators     simulator devices + downloaded iOS runtimes
 #   chrome-ai-model    Chrome's on-device AI model (and the policy that stops re-downloading it)
 #   claude-desktop-vm  Claude desktop VM bundles, while Claude.app is installed
@@ -36,8 +36,8 @@ LEFTOVER_IGNORE=()
 # Apps not opened in this many days are listed (report only).
 UNUSED_APP_DAYS=90
 
-# `makkili purge` without --all deletes quarantine batches older than this.
+# `makleen purge` without --all deletes quarantine batches older than this.
 QUARANTINE_DAYS=14
 
 # Where run logs go, one file per run named by date and time (default: logs/ next to the script).
-# LOG_DIR=~/Documents/makkili-logs
+# LOG_DIR=~/Documents/makleen-logs

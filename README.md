@@ -1,13 +1,13 @@
-# makkili
+# makleen
 
 Find what is eating disk space on a developer's Mac, pick what to clean, and reclaim it safely.
 
-makkili scans your Mac for space it can reclaim: data left behind by apps you uninstalled, tool caches,
+makleen scans your Mac for space it can reclaim: data left behind by apps you uninstalled, tool caches,
 build folders in projects you haven't touched in a while, and a few large optional items. It shows
 everything in a checklist, you tick what should go, and it cleans only that.
 
 ```
- makkili  ██████████████░░░░░░  316.9 GB used · 124.8 GB free
+ makleen  ██████████████░░░░░░  316.9 GB used · 124.8 GB free
  Selected 48.2 GB of 70.6 GB found
 
   [~] Tool caches  deleted, rebuild themselves                    19.7 GB of 24.3 GB
@@ -41,7 +41,7 @@ everything in a checklist, you tick what should go, and it cleans only that.
 
 ## Requirements
 
-- macOS. makkili relies on macOS tools such as `lsregister`, `plutil`, `codesign`, `mdls` and `launchctl`.
+- macOS. makleen relies on macOS tools such as `lsregister`, `plutil`, `codesign`, `mdls` and `launchctl`.
   It has been tested on macOS 15 (Sequoia) on Apple Silicon.
 - zsh, which macOS ships as `/bin/zsh`. Nothing else needs installing.
 - The tools whose caches it cleans are optional; anything not installed is skipped.
@@ -49,17 +49,17 @@ everything in a checklist, you tick what should go, and it cleans only that.
 ## Quick start
 
 ```sh
-git clone <repo-url> makkili && cd makkili
-./makkili --dry-run     # scan, pick items, see the plan; nothing changes
-./makkili               # scan, pick items, confirm, clean
-./makkili scan          # just the report
+git clone <repo-url> makleen && cd makleen
+./makleen --dry-run     # scan, pick items, see the plan; nothing changes
+./makleen               # scan, pick items, confirm, clean
+./makleen scan          # just the report
 ```
 
-A full scan takes about a minute. To run makkili from anywhere, link it into a folder on your `PATH`.
-Keep the repo where it is: makkili follows the link to find its `lib/` folder.
+A full scan takes about a minute. To run makleen from anywhere, link it into a folder on your `PATH`.
+Keep the repo where it is: makleen follows the link to find its `lib/` folder.
 
 ```sh
-ln -s "$PWD/makkili" ~/.local/bin/makkili
+ln -s "$PWD/makleen" ~/.local/bin/makleen
 ```
 
 ## What it finds
@@ -75,12 +75,12 @@ Findings are grouped into four sections. Each section is cleaned differently.
 
 ### Leftovers from uninstalled apps
 
-When you drag an app to the Trash, its data in `~/Library` stays behind. makkili looks in
+When you drag an app to the Trash, its data in `~/Library` stays behind. makleen looks in
 `Application Support` (including its `Caches` folder), `Caches`, `Containers`, `Group Containers` and `Logs`. For apps
 that macOS remembers as once installed, it also looks in `Preferences`, `Saved Application State`,
 `HTTPStorages`, `WebKit`, `Application Scripts` and `Cookies`.
 
-A folder is reported only when no installed app owns it. makkili compares each folder with the bundle ID,
+A folder is reported only when no installed app owns it. makleen compares each folder with the bundle ID,
 name, executable and vendor of every installed app, matches group containers by the app's team ID, and
 treats folders named after an installed command-line tool as that tool's data. Apple's own folders are
 always skipped: a folder is Apple's when macOS ships a framework, app, daemon or launch job of that name,
@@ -99,7 +99,7 @@ Each leftover is either confirmed or marked **check first**:
 
 ### Tool caches
 
-The caches makkili knows are listed in [catalog.zsh](catalog.zsh), one line each. Only the ones that exist
+The caches makleen knows are listed in [catalog.zsh](catalog.zsh), one line each. Only the ones that exist
 on your Mac, and whose tool is installed where that matters, show up.
 
 | Area | Caches |
@@ -116,11 +116,11 @@ on your Mac, and whose tool is installed where that matters, show up.
 | Others | Homebrew old versions and downloads, Docker build cache, Arduino download staging |
 
 Where a tool has its own clean command (`npm cache clean`, `go clean -modcache`, `brew cleanup`,
-`docker builder prune`, …), makkili uses it; other caches are deleted. Items that belong to an app,
+`docker builder prune`, …), makleen uses it; other caches are deleted. Items that belong to an app,
 such as browser, editor and app caches, can't be selected while that app runs. Cache folders under
 10 MB are not listed.
 
-**Add your own.** Put lines in the same format in `~/.config/makkili/catalog.zsh`; they're loaded after
+**Add your own.** Put lines in the same format in `~/.config/makleen/catalog.zsh`; they're loaded after
 the built-in catalog:
 
 ```zsh
@@ -138,7 +138,7 @@ not match `NEVER_TOUCH`; others are never offered.
 
 ### Build folders in idle projects
 
-makkili looks for projects in `PROJECT_ROOTS`. When that is empty, it uses every folder in your home
+makleen looks for projects in `PROJECT_ROOTS`. When that is empty, it uses every folder in your home
 folder that contains at least two git repositories within three levels. Desktop, Documents and Downloads
 are skipped, because reading them makes macOS ask for permission; list them in `PROJECT_ROOTS` if your
 projects live there.
@@ -188,11 +188,11 @@ Extras listed in `EXTRAS` start ticked; the others are listed unticked. The ones
 ### Apps you don't use
 
 The full report also lists apps in `/Applications` not opened in `UNUSED_APP_DAYS` (90 by default), with
-their size. makkili never uninstalls apps.
+their size. makleen never uninstalls apps.
 
 ## Safety
 
-What makkili never does:
+What makleen never does:
 
 - **Use `sudo`.** Everything it deletes or moves itself has to be at least two folders deep inside your
   home folder, and macOS protects its own system files anyway.
@@ -213,7 +213,7 @@ What cleaning costs:
 - iOS simulator runtimes are several GB each to download again.
 - Some MCP servers start through `npx`. If one is running while the npx cache is cleared, restart it.
 
-Run `makkili --dry-run` first to see exactly what would happen.
+Run `makleen --dry-run` first to see exactly what would happen.
 
 ## The checklist
 
@@ -241,17 +241,17 @@ The total at the top updates as you tick items.
 ## Commands and options
 
 ```
-makkili                          scan, then pick what to clean from the checklist
-makkili scan [CATEGORY...]       print a report; nothing changes
-makkili clean [CATEGORY...]      the checklist for some categories only
-makkili quarantine               list quarantined batches
-makkili restore BATCH            move a batch back where it came from
-makkili purge                    permanently delete batches older than QUARANTINE_DAYS
-makkili schedule install|remove  set up or remove the weekly report
-makkili help | --version
+makleen                          scan, then pick what to clean from the checklist
+makleen scan [CATEGORY...]       print a report; nothing changes
+makleen clean [CATEGORY...]      the checklist for some categories only
+makleen quarantine               list quarantined batches
+makleen restore BATCH            move a batch back where it came from
+makleen purge                    permanently delete batches older than QUARANTINE_DAYS
+makleen schedule install|remove  set up or remove the weekly report
+makleen help | --version
 ```
 
-Categories are `leftovers`, `caches`, `projects` and `extras`. Plain `makkili` without a terminal, for
+Categories are `leftovers`, `caches`, `projects` and `extras`. Plain `makleen` without a terminal, for
 example in a pipe, prints the report instead of opening the checklist.
 
 | Option | Effect |
@@ -266,20 +266,20 @@ example in a pipe, prints the report instead of opening the checklist.
 Clean one thing without the checklist:
 
 ```sh
-makkili clean leftovers --only cursor --dry-run   # check what matches
-makkili clean leftovers --only cursor --yes
+makleen clean leftovers --only cursor --dry-run   # check what matches
+makleen clean leftovers --only cursor --yes
 ```
 
 ## Quarantine
 
-Leftovers are moved, not deleted, to `~/.makkili/quarantine/<date>-<time>/`, keeping their original
+Leftovers are moved, not deleted, to `~/.makleen/quarantine/<date>-<time>/`, keeping their original
 paths and a `MANIFEST` of what came from where. **They still use disk space until you purge them.**
 
 ```sh
-makkili quarantine                 # list batches with size and contents
-makkili restore 20261025-032640    # put a batch back
-makkili purge                      # delete batches older than QUARANTINE_DAYS (14 by default)
-makkili purge --all                # delete every batch now
+makleen quarantine                 # list batches with size and contents
+makleen restore 20261025-032640    # put a batch back
+makleen purge                      # delete batches older than QUARANTINE_DAYS (14 by default)
+makleen purge --all                # delete every batch now
 ```
 
 Restore never overwrites: if something exists at the original path again, that item stays in quarantine.
@@ -314,18 +314,18 @@ contain your own paths; set `LOG_DIR` to keep them elsewhere.
 ## Weekly report
 
 ```sh
-makkili schedule install   # Sundays at 10:00
-makkili schedule remove
+makleen schedule install   # Sundays at 10:00
+makleen schedule remove
 ```
 
-This adds a launchd agent (`dev.makkili.weekly`) that runs a full scan, writes the report to
+This adds a launchd agent (`dev.makleen.weekly`) that runs a full scan, writes the report to
 `logs/<date>_<time>_report.log`, and shows a notification with how much can be reclaimed. It never
 deletes anything. The agent records the script's location and your `PATH` when you install it, so run
 `schedule install` again after moving the repo.
 
 ## Configuration
 
-Copy [config.example.zsh](config.example.zsh) to `~/.config/makkili/config.zsh` and edit it. It is plain
+Copy [config.example.zsh](config.example.zsh) to `~/.config/makleen/config.zsh` and edit it. It is plain
 zsh.
 
 | Setting | Default | Meaning |
@@ -337,23 +337,23 @@ zsh.
 | `LEFTOVER_IGNORE` | none | globs of `~/Library` entry names never reported as leftovers |
 | `NEVER_TOUCH` | none | lowercase globs of paths never reported, moved or deleted; a pattern matches anywhere in the path |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
-| `QUARANTINE_DAYS` | `14` | age at which `makkili purge` deletes a batch |
+| `QUARANTINE_DAYS` | `14` | age at which `makleen purge` deletes a batch |
 | `LOG_DIR` | `logs/` next to the script | where run logs go |
 
-Your own caches and extras go in `~/.config/makkili/catalog.zsh`; see [Tool caches](#tool-caches).
+Your own caches and extras go in `~/.config/makleen/catalog.zsh`; see [Tool caches](#tool-caches).
 
-Environment variables: `MAKKILI_CONFIG` and `MAKKILI_CATALOG` point at a different config or catalog
-file, and `MAKKILI_HOME` moves the state folder (default `~/.makkili`, which holds the quarantine).
+Environment variables: `MAKLEEN_CONFIG` and `MAKLEEN_CATALOG` point at a different config or catalog
+file, and `MAKLEEN_HOME` moves the state folder (default `~/.makleen`, which holds the quarantine).
 
 ## Limitations
 
 - Leftover detection is a judgement made from installed apps and what macOS remembers. It has only been
   tested on one Mac, which is why leftovers are quarantined rather than deleted.
 - Without Full Disk Access for your terminal, Mail, Messages, Photos, Safari and the Trash can't be
-  measured, and leftovers in app containers can't be moved. makkili doesn't clean those personal folders
+  measured, and leftovers in app containers can't be moved. makleen doesn't clean those personal folders
   anyway, but the report says so. Moving app containers with Full Disk Access hasn't been tested.
 - System-wide leftovers outside your home folder, such as files in `/etc` or `/Library` left by an
-  uninstaller, are out of scope because makkili never uses `sudo`.
+  uninstaller, are out of scope because makleen never uses `sudo`.
 - Docker's build cache and unused images are measured only while Docker is running.
 - Catalog lines for tools that weren't on the test Mac (Cargo, Maven, Conda, Composer, Dart and others)
   were checked against test folders, not real installs of those tools.
@@ -362,15 +362,15 @@ file, and `MAKKILI_HOME` moves the state folder (default `~/.makkili`, which hol
 
 | File | What it holds |
 |---|---|
-| `makkili` | usage text, settings, config loading and the command dispatcher |
-| `catalog.zsh` | the caches and simple extras makkili knows, one line each |
+| `makleen` | usage text, settings, config loading and the command dispatcher |
+| `catalog.zsh` | the caches and simple extras makleen knows, one line each |
 | `lib/common.zsh` | the item table, sizes, logging, catalog loading, and the safety checks (`NEVER_TOUCH`, `safe_path`) |
 | `lib/leftovers.zsh` | detecting data of uninstalled apps |
 | `lib/caches.zsh` | the `cache` and `editor` catalog entries, and caches that need more than a path: JetBrains, installed apps, Homebrew, Docker |
 | `lib/projects.zsh` | idle projects and their build folders |
 | `lib/extras.zsh` | optional extras |
 | `lib/scan.zsh` | running the scanners and the default selection |
-| `lib/report.zsh` | the `makkili scan` report |
+| `lib/report.zsh` | the `makleen scan` report |
 | `lib/checklist.zsh` | the interactive checklist |
 | `lib/clean.zsh` | cleaning what was picked |
 | `lib/quarantine.zsh` | `quarantine`, `restore` and `purge` |
@@ -382,9 +382,9 @@ keeping the newest version of something, belong in `lib/caches.zsh`.
 ## Uninstall
 
 ```sh
-makkili schedule remove        # if you installed the weekly report
-makkili purge --all            # or restore anything you still want first
-rm -rf ~/.makkili ~/.config/makkili ~/.local/bin/makkili
+makleen schedule remove        # if you installed the weekly report
+makleen purge --all            # or restore anything you still want first
+rm -rf ~/.makleen ~/.config/makleen ~/.local/bin/makleen
 ```
 
 Then delete the repo folder, including `logs/` if you don't want the history.
@@ -395,5 +395,4 @@ Then delete the repo folder, including `logs/` if you don't want the history.
 
 ---
 
-The name comes from Makkili, a comedy character in the Malayalam film *Varikkuzhiyile Kolapathakam*,
-and it happens to rhyme with *mac-clean*.
+The name is *mac clean*, said quickly.

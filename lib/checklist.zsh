@@ -1,4 +1,4 @@
-# makkili: the interactive checklist. Sourced by the makkili entry script.
+# makleen: the interactive checklist. Sourced by the makleen entry script.
 
 tui_size() {
   local s=$(stty size </dev/tty 2>/dev/null)
@@ -64,7 +64,7 @@ tui_draw() {
     (( total += I_KB[i] ))
     [[ $I_KIND[i] == quarantine ]] && (( qkb += I_KB[i] ))
   done
-  out+=(" ${BOLD}makkili${RESET}  ${DIM}$DISK_LINE${RESET}")
+  out+=(" ${BOLD}makleen${RESET}  ${DIM}$DISK_LINE${RESET}")
   label=" Selected ${BOLD}$(human $total)${RESET} ${DIM}of $FOUND_HUMAN found"
   (( qkb )) && label+=" · $(human $qkb) of it goes to quarantine first"
   out+=("$label$RESET" "")

@@ -1,4 +1,4 @@
-# makkili: build folders in projects that have not been used lately. Sourced by the makkili entry script.
+# makleen: build folders in projects that have not been used lately. Sourced by the makleen entry script.
 
 ARTIFACT_NAMES=(node_modules .next .nuxt .svelte-kit .turbo .parcel-cache .angular .expo
   .venv venv env Pods build .cxx .gradle target .dart_tool .terraform)

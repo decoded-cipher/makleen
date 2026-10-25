@@ -1,4 +1,4 @@
-# makkili: large optional items, preselected only when named in EXTRAS. Sourced by the makkili entry script.
+# makleen: large optional items, preselected only when named in EXTRAS. Sourced by the makleen entry script.
 
 add_extra() {  # name label kb kind target note [guard]
   local flag=
@@ -26,7 +26,7 @@ extra() {
   fi
   for p in $paths; do
     p=${(e)p}; p=${p/#\~/$HOME}
-    [[ -n $p && -d $p ]] && safe_path $p && dirs+=($p)  # only folders makkili may delete
+    [[ -n $p && -d $p ]] && safe_path $p && dirs+=($p)  # only folders makleen may delete
   done
   (( $#dirs )) || return 0
   local kb=$(kb_of $dirs)

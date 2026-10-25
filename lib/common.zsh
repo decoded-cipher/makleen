@@ -1,4 +1,4 @@
-# makkili: categories, the item table and shared helpers. Sourced by the makkili entry script.
+# makleen: categories, the item table and shared helpers. Sourced by the makleen entry script.
 
 ALL_CATEGORIES=(leftovers caches projects extras)
 typeset -A CATEGORY_NAME CATEGORY_HINT
@@ -37,7 +37,7 @@ add_item() {  # category label kb kind target [note] [flag] [guard]
 
 # ---- helpers ----
 say()  { print -r -- "$@" }
-warn() { print -ru2 -- "makkili: $*" }
+warn() { print -ru2 -- "makleen: $*" }
 die()  { warn "$@"; exit 1 }
 progress()      { [[ -t 2 ]] && print -nru2 -- $'\r\e[K'"  ${DIM}$*${RESET}" }
 progress_done() { [[ -t 2 ]] && print -nu2 -- $'\r\e[K' }
@@ -116,7 +116,7 @@ log_open() {  # kind
   local stamp=$(strftime %Y-%m-%d_%H-%M-%S $EPOCHSECONDS) n=1
   LOG_FILE=$LOG_DIR/${stamp}_$1.log
   while [[ -e $LOG_FILE ]]; do LOG_FILE=$LOG_DIR/${stamp}_$1-$(( ++n )).log; done
-  log "makkili $VERSION · $1 · $(strftime '%Y-%m-%d %H:%M:%S' $EPOCHSECONDS)"
+  log "makleen $VERSION · $1 · $(strftime '%Y-%m-%d %H:%M:%S' $EPOCHSECONDS)"
   log "free space: $(human $(free_kb))"
   log ""
 }

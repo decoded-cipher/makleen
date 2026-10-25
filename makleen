@@ -1,14 +1,14 @@
 #!/bin/zsh
-# makkili: find what is eating disk space on a dev Mac, pick what to clean, reclaim it safely.
+# makleen: find what is eating disk space on a dev Mac, pick what to clean, reclaim it safely.
 #
 # Usage:
-#   makkili                          scan, then pick what to clean from a checklist
-#   makkili scan [CATEGORY...]       print a report and exit, nothing is changed
-#   makkili clean [CATEGORY...]      scan + checklist for the given categories
-#   makkili quarantine               list quarantined batches
-#   makkili restore BATCH            put a quarantined batch back
-#   makkili purge [--older-than N | --all]
-#   makkili schedule install|remove  weekly report notification (launchd), never deletes
+#   makleen                          scan, then pick what to clean from a checklist
+#   makleen scan [CATEGORY...]       print a report and exit, nothing is changed
+#   makleen clean [CATEGORY...]      scan + checklist for the given categories
+#   makleen quarantine               list quarantined batches
+#   makleen restore BATCH            put a quarantined batch back
+#   makleen purge [--older-than N | --all]
+#   makleen schedule install|remove  weekly report notification (launchd), never deletes
 #
 # Categories: leftovers caches projects extras
 #
@@ -21,8 +21,8 @@
 #
 # Checklist keys: up/down or j/k move, space selects, a toggles the section, enter continues, q quits
 #
-# Config: ~/.config/makkili/config.zsh (plain zsh, see config.example.zsh)
-# Catalog: catalog.zsh lists the caches makkili knows; add your own in ~/.config/makkili/catalog.zsh
+# Config: ~/.config/makleen/config.zsh (plain zsh, see config.example.zsh)
+# Catalog: catalog.zsh lists the caches makleen knows; add your own in ~/.config/makleen/catalog.zsh
 
 emulate zsh
 setopt extended_glob null_glob pipefail
@@ -33,13 +33,13 @@ zmodload -F zsh/stat b:zstat
 
 VERSION=0.2.0
 SCRIPT=${0:A}
-STATE_DIR=${MAKKILI_HOME:-$HOME/.makkili}
+STATE_DIR=${MAKLEEN_HOME:-$HOME/.makleen}
 QUARANTINE_DIR=$STATE_DIR/quarantine
 LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the real script, not a symlink
-CONFIG_FILE=${MAKKILI_CONFIG:-$HOME/.config/makkili/config.zsh}
+CONFIG_FILE=${MAKLEEN_CONFIG:-$HOME/.config/makleen/config.zsh}
 CATALOG_FILE=${SCRIPT:h}/catalog.zsh
-USER_CATALOG=${MAKKILI_CATALOG:-$HOME/.config/makkili/catalog.zsh}  # your own entries, same format
-AGENT_LABEL=dev.makkili.weekly
+USER_CATALOG=${MAKLEEN_CATALOG:-$HOME/.config/makleen/catalog.zsh}  # your own entries, same format
+AGENT_LABEL=dev.makleen.weekly
 AGENT_PLIST=$HOME/Library/LaunchAgents/$AGENT_LABEL.plist
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
@@ -54,9 +54,9 @@ UNUSED_APP_DAYS=90
 QUARANTINE_DAYS=14
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
 
-# The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makkili.
+# The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makleen.
 for part in common leftovers caches projects extras scan report checklist clean quarantine schedule; do
-  source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makkili: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
+  source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makleen: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
 done
 unset part
 
@@ -67,7 +67,7 @@ main() {
   case ${1:-} in
     scan|clean|quarantine|restore|purge|schedule|notify) cmd=$1; shift ;;
     help|-h|--help) usage; return ;;
-    version|--version) say "makkili $VERSION"; return ;;
+    version|--version) say "makleen $VERSION"; return ;;
   esac
   CATS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0 PURGE_ALL=0 PURGE_DAYS=$QUARANTINE_DAYS
   local -a args
@@ -84,7 +84,7 @@ main() {
     esac
     shift
   done
-  if [[ -z $cmd ]]; then  # plain `makkili`: checklist in a terminal, report otherwise
+  if [[ -z $cmd ]]; then  # plain `makleen`: checklist in a terminal, report otherwise
     if (( ASSUME_YES || DRY_RUN )) || [[ -t 0 && -t 1 ]]; then cmd=clean; else cmd=scan; fi
   fi
   case $cmd in

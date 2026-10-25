@@ -1,10 +1,10 @@
-# makkili: the makkili scan report. Sourced by the makkili entry script.
+# makleen: the makleen scan report. Sourced by the makleen entry script.
 
 print_report() {
   local W=$(term_width) cat i shown row
   say ""
   disk_bar 24
-  say " ${BOLD}makkili${RESET}  $REPLY"
+  say " ${BOLD}makleen${RESET}  $REPLY"
   say ""
   printf " ${DIM}%-36s %10s %12s${RESET}\n" "" "found" "selected"
   local all=0 picked=0
@@ -15,7 +15,7 @@ print_report() {
     (( all += f, picked += REPLY ))
   done
   printf " ${BOLD}%-36s %10s %12s${RESET}\n" "Total" "$(human $all)" "$(human $picked)"
-  say " ${DIM}selected = what \`makkili\` preselects in the checklist; you can change it there${RESET}"
+  say " ${DIM}selected = what \`makleen\` preselects in the checklist; you can change it there${RESET}"
 
   for cat in $CATS; do
     sorted_indices $cat
@@ -24,7 +24,7 @@ print_report() {
     say " ${BOLD}${CATEGORY_NAME[$cat]}${RESET}  ${DIM}${CATEGORY_HINT[$cat]}${RESET}"
     shown=0
     for i in $reply; do
-      if (( ! SHOW_ALL && shown >= 10 )); then say "   ${DIM}… $(( $#reply - shown )) more (makkili scan --all)${RESET}"; break; fi
+      if (( ! SHOW_ALL && shown >= 10 )); then say "   ${DIM}… $(( $#reply - shown )) more (makleen scan --all)${RESET}"; break; fi
       item_tag $i
       local tag=$REPLY tagc=$REPLY2
       fit $I_LABEL[i] $(( W - 16 - (${#tag} ? ${#tag} + 2 : 0) ))
@@ -38,7 +38,7 @@ print_report() {
   say ""
   (( ACTIVE_KB )) && say " ${DIM}Kept: $(human $ACTIVE_KB) of build folders in projects used in the last $INACTIVE_DAYS days${RESET}"
   local q=$(kb_of $QUARANTINE_DIR)
-  (( q )) && say " ${DIM}Quarantine holds $(human $q). Free it with \`makkili purge\`.${RESET}"
+  (( q )) && say " ${DIM}Quarantine holds $(human $q). Free it with \`makleen purge\`.${RESET}"
   for row in $SKIPPED; do say " ${DIM}Note: $row${RESET}"; done
   if (( $#UNUSED_APPS )); then
     say ""

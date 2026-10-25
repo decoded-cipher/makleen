@@ -1,4 +1,4 @@
-# makkili: running the scanners and the default selection. Sourced by the makkili entry script.
+# makleen: running the scanners and the default selection. Sourced by the makleen entry script.
 
 # Report only: apps nobody has opened in a while.
 collect_unused_apps() {
@@ -24,7 +24,7 @@ category_kb() {  # category [picked-only] -> REPLY
 
 collect_all() {
   local cat t0
-  [[ -t 2 ]] && print -u2 "${BOLD}makkili${RESET} ${DIM}· looking for space to reclaim${RESET}"
+  [[ -t 2 ]] && print -u2 "${BOLD}makleen${RESET} ${DIM}· looking for space to reclaim${RESET}"
   for cat in $CATS; do
     t0=$EPOCHREALTIME
     collect_$cat

@@ -1,4 +1,4 @@
-# makkili: the weekly report (launchd) and its notification. Sourced by the makkili entry script.
+# makleen: the weekly report (launchd) and its notification. Sourced by the makleen entry script.
 
 cmd_schedule() {
   case $1 in
@@ -27,7 +27,7 @@ EOF
       launchctl bootout gui/$UID/$AGENT_LABEL 2>/dev/null
       rm -f $AGENT_PLIST && say "Weekly report removed."
       ;;
-    *) die "usage: makkili schedule install|remove" ;;
+    *) die "usage: makleen schedule install|remove" ;;
   esac
 }
 
@@ -39,8 +39,8 @@ cmd_notify() {
   print_report >> $LOG_FILE
   local picked=0 i
   for (( i = 1; i <= $#I_KB; i++ )); do (( PICK[i] )) && (( picked += I_KB[i] )); done
-  local msg="$(human $picked) can be reclaimed. Run makkili to review."
+  local msg="$(human $picked) can be reclaimed. Run makleen to review."
   local q=$(kb_of $QUARANTINE_DIR)
   (( q )) && msg+=" Quarantine holds $(human $q)."
-  osascript -e "display notification \"$msg\" with title \"makkili\""
+  osascript -e "display notification \"$msg\" with title \"makleen\""
 }

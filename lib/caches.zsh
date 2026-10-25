@@ -1,4 +1,4 @@
-# makkili: tool caches. Sourced by the makkili entry script.
+# makleen: tool caches. Sourced by the makleen entry script.
 
 # ---- catalog entry types (the entries themselves are in catalog.zsh) ----
 
@@ -25,7 +25,7 @@ cache() {
   [[ -z $needs ]] || has $needs || return 0
   for p in $paths; do
     p=${(e)p}; p=${p/#\~/$HOME}  # single-quoted paths are expanded only now
-    [[ -n $p && -d $p ]] && safe_path $p && dirs+=($p)  # only folders makkili may delete
+    [[ -n $p && -d $p ]] && safe_path $p && dirs+=($p)  # only folders makleen may delete
   done
   (( $#dirs )) || return 0
   local kb=$(kb_of $dirs)
