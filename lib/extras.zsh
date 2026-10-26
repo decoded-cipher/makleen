@@ -75,7 +75,7 @@ extra_claude_vm() {
 extra_android_emulators() {
   local -a avds=($HOME/.android/avd/*.avd(/))
   (( $#avds )) || return
-  add_extra android-emulators "Android emulators: ${(j:, :)${(@)avds:t:r}}" $(kb_of $avds) rm "${(F)avds}"$'\n'"${(F)${avds/%.avd/.ini}}" \
+  add_extra android-emulators "Android emulators: ${(j:, :)${(@)avds:t:r}}" $(kb_of $avds) rm "${(F)avds}"$'\n'"${(F)${(@)avds/%.avd/.ini}}" \
     "recreate in Android Studio → Device Manager" "qemu-system"
 }
 
