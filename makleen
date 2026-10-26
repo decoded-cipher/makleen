@@ -35,7 +35,8 @@ VERSION=0.2.1
 SCRIPT=${0:A}
 STATE_DIR=${MAKLEEN_HOME:-$HOME/.makleen}
 QUARANTINE_DIR=$STATE_DIR/quarantine
-LOG_DIR=${SCRIPT:h}/logs  # one log per run, named by date and time; next to the real script, not a symlink
+# one log per run: in the repo for a clone, else in the state folder
+[[ -d ${SCRIPT:h}/.git ]] && LOG_DIR=${SCRIPT:h}/logs || LOG_DIR=$STATE_DIR/logs
 CONFIG_FILE=${MAKLEEN_CONFIG:-$HOME/.config/makleen/config.zsh}
 CATALOG_FILE=${SCRIPT:h}/catalog.zsh
 USER_CATALOG=${MAKLEEN_CATALOG:-$HOME/.config/makleen/catalog.zsh}  # your own entries, same format

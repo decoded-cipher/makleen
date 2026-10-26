@@ -52,16 +52,19 @@ It is about 65 KB of zsh with nothing to install or compile, so you can read eve
 ## Quick start
 
 ```sh
-git clone <repo-url> makleen && cd makleen
-./makleen --dry-run     # scan, pick items, see the plan; nothing changes
-./makleen               # scan, pick items, confirm, clean
-./makleen scan          # just the report
+brew install decoded-cipher/tap/makleen
+makleen --dry-run     # scan, pick items, see the plan; nothing changes
+makleen               # scan, pick items, confirm, clean
+makleen scan          # just the report
 ```
 
-A full scan takes about a minute. To run makleen from anywhere, link it into a folder on your `PATH`.
-Keep the repo where it is: makleen follows the link to find its `lib/` folder.
+A full scan takes about a minute.
+
+Or run it from a clone. To run it from anywhere, link it into a folder on your `PATH`, and keep the repo
+where it is: makleen follows the link to find its `lib/` folder.
 
 ```sh
+git clone https://github.com/decoded-cipher/makleen && cd makleen
 ln -s "$PWD/makleen" ~/.local/bin/makleen
 ```
 
@@ -289,8 +292,8 @@ Restore never overwrites: if something exists at the original path again, that i
 
 ## Logs
 
-Every run that changes something writes one log file to `logs/` next to the script, named by when it
-started:
+Every run that changes something writes one log file, named by when it started. Logs go to `logs/` in
+the repo when you run makleen from a clone, and to `~/.makleen/logs/` otherwise, as with Homebrew:
 
 ```
 logs/2026-10-25_03-26-40_clean.log
@@ -311,8 +314,8 @@ starts with your free space; clean and purge logs also end with it.
                              deleted ~/Developer/work/mobile-app/node_modules
 ```
 
-`scan` and `--dry-run` change nothing and write no log. The `logs/` folder is git-ignored because logs
-contain your own paths; set `LOG_DIR` to keep them elsewhere.
+`scan` and `--dry-run` change nothing and write no log. In a clone the `logs/` folder is git-ignored because
+logs contain your own paths. Set `LOG_DIR` to keep them elsewhere.
 
 ## Weekly report
 
@@ -322,9 +325,9 @@ makleen schedule remove
 ```
 
 This adds a launchd agent (`dev.makleen.weekly`) that runs a full scan, writes the report to
-`logs/<date>_<time>_report.log`, and shows a notification with how much can be reclaimed. It never
-deletes anything. The agent records the script's location and your `PATH` when you install it, so run
-`schedule install` again after moving the repo.
+`<date>_<time>_report.log` in the [log folder](#logs), and shows a notification with how much can be
+reclaimed. It never deletes anything. The agent records the script's location and your `PATH` when you
+install it, so run `schedule install` again after moving the repo. Homebrew upgrades don't need that.
 
 ## Configuration
 
@@ -341,7 +344,7 @@ zsh.
 | `NEVER_TOUCH` | none | globs of paths never reported, moved or deleted, along with everything inside them; a pattern matches anywhere in the path |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
 | `QUARANTINE_DAYS` | `14` | age at which `makleen purge` deletes a batch |
-| `LOG_DIR` | `logs/` next to the script | where run logs go |
+| `LOG_DIR` | `logs/` in a clone, else `~/.makleen/logs` | where run logs go |
 
 Patterns ignore case, and in `PROTECT` and `NEVER_TOUCH` a leading `~` is your home folder. A bare name
 matches a folder of that name anywhere: `NEVER_TOUCH=(mkcert)` protects every `mkcert` folder and what's in it.
@@ -418,10 +421,11 @@ keeping the newest version of something, belong in `lib/caches.zsh`.
 ```sh
 makleen schedule remove        # if you installed the weekly report
 makleen purge --all            # or restore anything you still want first
-rm -rf ~/.makleen ~/.config/makleen ~/.local/bin/makleen
+rm -rf ~/.makleen ~/.config/makleen
 ```
 
-Then delete the repo folder, including `logs/` if you don't want the history.
+Then `brew uninstall makleen`, or for a clone remove `~/.local/bin/makleen` and delete the repo folder,
+including `logs/` if you don't want the history.
 
 ## License
 

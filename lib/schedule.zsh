@@ -3,6 +3,8 @@
 cmd_schedule() {
   case $1 in
     install)
+      local exe=$SCRIPT
+      [[ -n $commands[makleen] && ${commands[makleen]:A} == $SCRIPT ]] && exe=$commands[makleen]
       mkdir -p ${AGENT_PLIST:h}
       cat > $AGENT_PLIST <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -11,7 +13,7 @@ cmd_schedule() {
 <dict>
   <key>Label</key><string>$AGENT_LABEL</string>
   <key>ProgramArguments</key>
-  <array><string>/bin/zsh</string><string>$SCRIPT</string><string>notify</string></array>
+  <array><string>/bin/zsh</string><string>$exe</string><string>notify</string></array>
   <key>EnvironmentVariables</key>
   <dict><key>PATH</key><string>$PATH</string></dict>
   <key>StartCalendarInterval</key>
