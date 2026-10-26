@@ -4,7 +4,8 @@ Find what is eating disk space on a developer's Mac, pick what to clean, and rec
 
 makleen scans your Mac for space it can reclaim: data left behind by apps you uninstalled, tool caches,
 build folders in projects you haven't touched in a while, and a few large optional items. It shows
-everything in a checklist, you tick what should go, and it cleans only that.
+everything in a checklist, you tick what should go, and it cleans only that. Or ask an AI agent such as
+Claude Code or Codex to do it through the bundled [skill](#use-it-from-an-ai-agent).
 
 It is about 65 KB of zsh with nothing to install or compile, so you can read every line before it runs.
 
