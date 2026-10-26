@@ -29,6 +29,7 @@ It is about 65 KB of zsh with nothing to install or compile, so you can read eve
 
 - [Requirements](#requirements)
 - [Quick start](#quick-start)
+- [Use it from an AI agent](#use-it-from-an-ai-agent)
 - [What it finds](#what-it-finds)
 - [Safety](#safety)
 - [The checklist](#the-checklist)
@@ -67,6 +68,25 @@ where it is: makleen follows the link to find its `lib/` folder.
 git clone https://github.com/decoded-cipher/makleen && cd makleen
 ln -s "$PWD/makleen" ~/.local/bin/makleen
 ```
+
+## Use it from an AI agent
+
+makleen ships an [Agent Skill](skills/makleen/SKILL.md), so you can ask Claude Code, Codex or another agent
+that reads `SKILL.md` skills to free up space. The agent scans, explains what it found, investigates the
+*check first* items, and cleans only what you approve after showing you the dry-run plan.
+
+Link the skill into your agent's skills folder. With Homebrew it's in `$(brew --prefix)/share/makleen`:
+
+```sh
+ln -s "$(brew --prefix)/share/makleen/skills/makleen" ~/.claude/skills/makleen    # Claude Code
+ln -s "$(brew --prefix)/share/makleen/skills/makleen" ~/.agents/skills/makleen    # Codex, and other agents that read ~/.agents/skills
+```
+
+From a clone, link `"$PWD/skills/makleen"` instead. Keep it a link rather than a copy: when makleen isn't
+on your `PATH`, the skill finds it through the link.
+
+The skill drives two options that are also useful in your own scripts: `makleen scan --json` lists every
+item with an ID, and `makleen clean --id ID,...` picks exactly those items.
 
 ## What it finds
 
@@ -249,6 +269,7 @@ The total at the top updates as you tick items.
 ```
 makleen                          scan, then pick what to clean from the checklist
 makleen scan [CATEGORY...]       print a report; nothing changes
+makleen scan --json              the same scan as JSON, every item with its ID
 makleen clean [CATEGORY...]      the checklist for some categories only
 makleen quarantine               list quarantined batches
 makleen restore BATCH            move a batch back where it came from
@@ -258,12 +279,15 @@ makleen help | --version
 ```
 
 Categories are `leftovers`, `caches`, `projects` and `extras`. Plain `makleen` without a terminal, for
-example in a pipe, prints the report instead of opening the checklist.
+example in a pipe, prints the report instead of opening the checklist, and `--dry-run` without a terminal
+shows the plan for the preselected items.
 
 | Option | Effect |
 |---|---|
 | `--dry-run` | show the plan and stop |
 | `--only TEXT` | preselect only items whose name or path contains `TEXT`, including *check first* and optional ones |
+| `--id ID,...` | clean only the items with these IDs, from `scan --json`, without the checklist; scans only their categories |
+| `--json` | `scan`: print every item as JSON |
 | `--yes` | skip the checklist and the confirmation, and clean the preselected items |
 | `--days N` | count projects as idle after `N` days |
 | `--all` | `scan`: list every item instead of the largest ten per section; `purge`: delete every batch |
@@ -274,7 +298,11 @@ Clean one thing without the checklist:
 ```sh
 makleen clean leftovers --only cursor --dry-run   # check what matches
 makleen clean leftovers --only cursor --yes
+makleen clean --id caches/npm-cache,extras/ios-simulators --yes
 ```
+
+An item's ID is its category and a slug of its name, such as `caches/npm-cache`; extras use their own ID,
+such as `extras/ios-simulators`.
 
 ## Quarantine
 
@@ -400,6 +428,7 @@ offer a GUI. For those, use one of the tools above.
 | File | What it holds |
 |---|---|
 | `makleen` | usage text, settings, config loading and the command dispatcher |
+| `skills/makleen/SKILL.md` | the Agent Skill for Claude Code, Codex and other agents |
 | `catalog.zsh` | the caches and simple extras makleen knows, one line each |
 | `lib/common.zsh` | the item table, sizes, logging, catalog loading, and the safety checks (`NEVER_TOUCH`, `safe_path`) |
 | `lib/leftovers.zsh` | detecting data of uninstalled apps |
@@ -407,7 +436,7 @@ offer a GUI. For those, use one of the tools above.
 | `lib/projects.zsh` | idle projects and their build folders |
 | `lib/extras.zsh` | optional extras |
 | `lib/scan.zsh` | running the scanners and the default selection |
-| `lib/report.zsh` | the `makleen scan` report |
+| `lib/report.zsh` | the `makleen scan` report and its JSON form |
 | `lib/checklist.zsh` | the interactive checklist |
 | `lib/clean.zsh` | cleaning what was picked |
 | `lib/quarantine.zsh` | `quarantine`, `restore` and `purge` |
@@ -425,7 +454,7 @@ rm -rf ~/.makleen ~/.config/makleen
 ```
 
 Then `brew uninstall makleen`, or for a clone remove `~/.local/bin/makleen` and delete the repo folder,
-including `logs/` if you don't want the history.
+including `logs/` if you don't want the history. Remove the skill links from your agents' skills folders.
 
 ## License
 

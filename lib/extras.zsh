@@ -4,6 +4,7 @@ add_extra() {  # name label kb kind target note [guard]
   local flag=
   (( ${EXTRAS[(Ie)$1]} )) || flag=optional
   add_item extras "$2" "$3" "$4" "$5" "$6 · id: $1" "$flag" "${7:-}"
+  I_ID[-1]=extras/$1
 }
 
 # Catalog entry type for extras that are plain folders:

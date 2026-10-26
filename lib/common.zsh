@@ -26,21 +26,29 @@ TILDE="~"  # replacement text for showing $HOME as ~
 #   kind:  rm (delete paths) | quarantine (move paths) | cmd (run shell code)
 #   flag:  "" (selected by default) | review (owner unconfirmed) | optional (extra not in EXTRAS)
 #   guard: process pattern; the item can't be selected while a matching process runs
-typeset -a I_CAT I_LABEL I_KB I_KIND I_TARGET I_NOTE I_FLAG I_GUARD I_SIZE
+#   id:    category/label-slug
+typeset -a I_CAT I_LABEL I_KB I_KIND I_TARGET I_NOTE I_FLAG I_GUARD I_SIZE I_ID
 typeset -a PICK LOCK ROWS SKIPPED UNUSED_APPS
 ACTIVE_KB=0
 
 add_item() {  # category label kb kind target [note] [flag] [guard]
   I_CAT+=("$1") I_LABEL+=("$2") I_KB+=("$3") I_KIND+=("$4") I_TARGET+=("$5")
   I_NOTE+=("${6:-}") I_FLAG+=("${7:-}") I_GUARD+=("${8:-}")
+  item_id $1 $2; I_ID+=($REPLY)
+}
+item_id() {  # category label -> REPLY
+  local s=${(L)2//\([0-9]##\)/}
+  s=${s//[^a-z0-9]##/-}; s=${${s##-##}%%-##}
+  REPLY=$1/${s:-item}
 }
 
 # ---- helpers ----
 say()  { print -r -- "$@" }
 warn() { print -ru2 -- "makleen: $*" }
 die()  { warn "$@"; exit 1 }
-progress()      { [[ -t 2 ]] && print -nru2 -- $'\r\e[K'"  ${DIM}$*${RESET}" }
-progress_done() { [[ -t 2 ]] && print -nu2 -- $'\r\e[K' }
+chatty()        { [[ -t 2 ]] && (( ! JSON )) }  # progress on stderr
+progress()      { chatty && print -nru2 -- $'\r\e[K'"  ${DIM}$*${RESET}" }
+progress_done() { chatty && print -nu2 -- $'\r\e[K' }
 has()     { (( $+commands[$1] )) }
 running() { local procs=$(ps -axo command=); [[ $procs == *"$1"* ]] }  # pgrep -f misses full app paths
 has_fda() { ls $HOME/Library/Mail >/dev/null 2>&1 }  # Full Disk Access for this terminal
@@ -56,6 +64,11 @@ human() {
 to_kb() {  # "4.091GB", "686.8MB", "8.1G" -> KB
   awk -v s=$1 'BEGIN { n = s + 0; u = toupper(s); gsub(/[^A-Z]/, "", u); u = substr(u, 1, 1)
     m = u == "T" ? 1073741824 : u == "G" ? 1048576 : u == "M" ? 1024 : u == "K" ? 1 : 0.001; printf "%d", n * m }'
+}
+json_str() {  # text -> REPLY
+  local s=${1//\\/\\\\}
+  s=${s//\"/\\\"}; s=${s//$'\n'/\\n}; s=${s//$'\t'/\\t}; s=${s//$'\r'/\\r}
+  REPLY=\"$s\"
 }
 free_kb() { df -k $HOME | awk 'NR == 2 { print $4 }' }
 skip()    { SKIPPED+=("$1: $2") }

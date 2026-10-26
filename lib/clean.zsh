@@ -63,9 +63,10 @@ execute_item() {  # index position count
 
 do_clean() {
   (( $#ROWS )) || { say "Nothing to clean."; return }
-  if (( ! ASSUME_YES )); then
-    [[ -t 0 && -t 1 ]] || die "the checklist needs a terminal; use --yes to clean the default selection"
+  if (( ! ASSUME_YES && ! $#IDS )) && [[ -t 0 && -t 1 ]]; then
     pick_items || { say "Quit, nothing changed."; return }
+  elif (( ! ASSUME_YES && ! DRY_RUN )) && [[ ! -t 0 || ! -t 1 ]]; then
+    die "the checklist needs a terminal; use --dry-run to see the plan, --yes to clean the preselected items"
   fi
 
   local cat i t total=0 n

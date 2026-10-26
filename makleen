@@ -14,6 +14,8 @@
 #
 # Options:
 #   --only TEXT   preselect only items whose name or path contains TEXT
+#   --id ID,...   clean only these items, ids from scan --json; no checklist
+#   --json        scan: print every item as JSON
 #   --days N      projects count as idle after N days without use
 #   --dry-run     show what would be cleaned and stop
 #   --yes         skip the checklist and confirmation, clean the default selection
@@ -70,11 +72,13 @@ main() {
     help|-h|--help) usage; return ;;
     version|--version) say "makleen $VERSION"; return ;;
   esac
-  CATS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0 PURGE_ALL=0 PURGE_DAYS=$QUARANTINE_DAYS
+  CATS=() IDS=() ONLY= DRY_RUN=0 ASSUME_YES=0 SHOW_ALL=0 PURGE_ALL=0 PURGE_DAYS=$QUARANTINE_DAYS JSON=0
   local -a args
   while (( $# )); do
     case $1 in
       --only)       ONLY=$2; shift ;;
+      --id)         IDS+=(${(s:,:)2}); shift ;;
+      --json)       JSON=1 ;;
       --days)       INACTIVE_DAYS=$2; shift ;;
       --older-than) PURGE_DAYS=$2; shift ;;
       --dry-run|-n) DRY_RUN=1 ;;
@@ -86,14 +90,23 @@ main() {
     shift
   done
   if [[ -z $cmd ]]; then  # plain `makleen`: checklist in a terminal, report otherwise
-    if (( ASSUME_YES || DRY_RUN )) || [[ -t 0 && -t 1 ]]; then cmd=clean; else cmd=scan; fi
+    if (( JSON )); then cmd=scan
+    elif (( ASSUME_YES || DRY_RUN )) || [[ -t 0 && -t 1 ]]; then cmd=clean; else cmd=scan; fi
   fi
   case $cmd in
     scan|clean)
       for a in $args; do (( ${ALL_CATEGORIES[(Ie)$a]} )) || die "unknown category: $a (use: $ALL_CATEGORIES)"; done
-      (( $#args )) && CATS=($args) || CATS=($ALL_CATEGORIES)
+      (( JSON )) && [[ $cmd != scan ]] && die "--json only works with scan"
+      local -a id_cats=(${(u)IDS%%/*})
+      if (( $#args )); then CATS=($args)
+      elif (( $#IDS )) && (( ! ${#id_cats:|ALL_CATEGORIES} )); then CATS=(${ALL_CATEGORIES:*id_cats})
+      else CATS=($ALL_CATEGORIES)
+      fi
       collect_all
-      if [[ $cmd == scan ]]; then print_report; else do_clean; fi
+      if (( JSON )); then print_json
+      elif [[ $cmd == scan ]]; then print_report
+      else do_clean
+      fi
       ;;
     quarantine) cmd_quarantine ;;
     restore)    cmd_restore ${args[1]:-} ;;
