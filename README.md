@@ -140,6 +140,7 @@ on your Mac, and whose tool is installed where that matters, show up.
 | Browsers | Chrome, Brave, Edge and Firefox caches only; history, logins and settings stay |
 | Editors | VS Code, Cursor, VSCodium and Windsurf caches and superseded extension versions; JetBrains caches of old IDE versions, keeping the newest of each IDE |
 | Apps | caches of installed apps in `~/Library/Caches` over 50 MB |
+| AI agents | Chrome DevTools MCP browser cache; its profile and sign-ins stay |
 | Others | Homebrew old versions and downloads, Docker build cache, Arduino download staging |
 
 Where a tool has its own clean command (`npm cache clean`, `go clean -modcache`, `brew cleanup`,

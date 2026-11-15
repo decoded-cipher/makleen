@@ -71,6 +71,14 @@ cache "Brave cache"                  ~/Library/Caches/BraveSoftware/Brave-Browse
 cache "Edge cache"                   "~/Library/Caches/Microsoft Edge"          while="Microsoft Edge.app/Contents/MacOS"
 cache "Firefox cache"                ~/Library/Caches/Firefox/Profiles          while="Firefox.app/Contents/MacOS"
 
+# ---- AI agents ----
+cache "Chrome DevTools MCP browser cache" ~/.cache/chrome-devtools-mcp/chrome-profile/Default/Cache \
+                                     "~/.cache/chrome-devtools-mcp/chrome-profile/Default/Code Cache" \
+                                     ~/.cache/chrome-devtools-mcp/chrome-profile/Default/GPUCache \
+                                     ~/.cache/chrome-devtools-mcp/chrome-profile/GraphiteDawnCache \
+                                     ~/.cache/chrome-devtools-mcp/chrome-profile/component_crx_cache \
+                                     while="chrome-devtools-mcp/chrome-profile"
+
 # ---- Editors ----
 editor "VS Code"  "~/Library/Application Support/Code"     ~/.vscode/extensions     while="Visual Studio Code.app/Contents/MacOS"
 editor "Cursor"   "~/Library/Application Support/Cursor"   ~/.cursor/extensions     while="Cursor.app/Contents/MacOS"
