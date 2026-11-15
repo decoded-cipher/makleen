@@ -24,7 +24,7 @@ keys in a checklist or a prompt you can't answer.
 
 1. **Scan.** `makleen scan --json`. It changes nothing and takes up to a few minutes, so allow a long
    timeout. Add categories to scan less: `makleen scan caches projects --json`. Categories are
-   `leftovers`, `caches`, `projects` and `extras`.
+   `leftovers`, `caches`, `agents`, `projects` and `extras`.
 2. **Explain.** Summarise for the user: free space, the total per category, and the largest items with what
    cleaning each one does. Group by what happens: quarantined and restorable, deleted and rebuilt
    on its own, deleted until reinstalled. Mention items that are `locked` and why. Quarantined leftovers

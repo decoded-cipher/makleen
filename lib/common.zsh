@@ -1,16 +1,18 @@
 # makleen: categories, the item table and shared helpers. Sourced by the makleen entry script.
 
-ALL_CATEGORIES=(leftovers caches projects extras)
+ALL_CATEGORIES=(leftovers caches agents projects extras)
 typeset -A CATEGORY_NAME CATEGORY_HINT
 CATEGORY_NAME=(
   leftovers "Leftovers from uninstalled apps"
   caches    "Tool caches"
+  agents    "AI agent leftovers"
   projects  "Build folders in idle projects"
   extras    "Optional extras"
 )
 CATEGORY_HINT=(
   leftovers "moved to quarantine, restorable"
   caches    "deleted, rebuild themselves"
+  agents    "deleted, chat history stays"
   projects  "deleted, reinstall/rebuild to restore"
   extras    "deleted, large optional items"
 )
@@ -51,6 +53,7 @@ progress()      { chatty && print -nru2 -- $'\r\e[K'"  ${DIM}$*${RESET}" }
 progress_done() { chatty && print -nu2 -- $'\r\e[K' }
 has()     { (( $+commands[$1] )) }
 running() { local procs=$(ps -axo command=); [[ $procs == *"$1"* ]] }  # pgrep -f misses full app paths
+inside()  { local d; for d in "${@:2}"; do [[ $1 == $d/* ]] && return 0; done; return 1 }  # path dir...
 has_fda() { ls $HOME/Library/Mail >/dev/null 2>&1 }  # Full Disk Access for this terminal
 norm()    { REPLY=${(L)1}; REPLY=${REPLY//[^a-z0-9]/} }
 kb_of()   { (( $# )) || { print 0; return }; du -skx -- "$@" 2>/dev/null | awk '{ s += $1 } END { print s + 0 }' }
@@ -126,7 +129,7 @@ load_claims() {
 }
 
 # Refuse anything protected or not at least two levels below $HOME.
-safe_path() { [[ ${1:a} == $HOME/?*/?* ]] && ! untouchable $1 }
+safe_path() { [[ ${1:a} == $HOME/?*/?* || ( -n $CLAUDE_TMP && ${1:a} == $CLAUDE_TMP/?*/?* ) ]] && ! untouchable $1 }
 
 # ---- run logs: every run that changes something writes $LOG_DIR/<date>_<time>_<kind>.log ----
 LOG_FILE=

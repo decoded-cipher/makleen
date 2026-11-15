@@ -3,7 +3,7 @@
 Find what is eating disk space on a developer's Mac, pick what to clean, and reclaim it safely.
 
 makleen scans your Mac for space it can reclaim: data left behind by apps you uninstalled, tool caches,
-build folders in projects you haven't touched in a while, and a few large optional items. It shows
+what AI coding agents leave behind, build folders in projects you haven't touched in a while, and a few large optional items. It shows
 everything in a checklist, you tick what should go, and it cleans only that. Or ask an AI agent such as
 Claude Code or Codex to do it through the bundled [skill](#use-it-from-an-ai-agent).
 
@@ -91,12 +91,13 @@ item with an ID, and `makleen clean --id ID,...` picks exactly those items.
 
 ## What it finds
 
-Findings are grouped into four sections. Each section is cleaned differently.
+Findings are grouped into five sections. Each section is cleaned differently.
 
 | Section | Cleaning does | Selected by default |
 |---|---|---|
 | Leftovers from uninstalled apps | moves them to the [quarantine](#quarantine), so you can restore them | items whose app is confirmed gone |
 | Tool caches | deletes them; they rebuild on their own | all |
+| AI agent leftovers | deletes them; worktrees are removed with git and keep their branch | all |
 | Build folders in idle projects | deletes them; reinstall or rebuild to get them back | all |
 | Optional extras | deletes them | only the ones listed in `EXTRAS` |
 
@@ -164,6 +165,25 @@ is expanded only when the line is used: `'$(go env GOMODCACHE)'` runs `go` only 
 Folders must be at least two levels inside your home folder (`~/.tool/cache`, not `~/.tool`), and must
 not match `NEVER_TOUCH`; others are never offered.
 
+### AI agent leftovers
+
+Coding agents such as Claude Code, Codex, Cursor and Conductor leave copies behind: worktrees, temp
+folders and half-finished downloads. makleen lists only what can go without losing anything. Chat
+transcripts, sessions, memories, rewind checkpoints, plugins and settings are never listed.
+
+| Item | What it is | Listed when |
+|---|---|---|
+| Agent worktrees | git worktrees in `.claude/worktrees/` inside a repo, `~/.codex/worktrees`, `~/.cursor/worktrees` or `~/conductor/workspaces` | nothing is uncommitted or untracked, HEAD is on a branch or already contained in one, and git hasn't touched it for `AGENT_IDLE_DAYS` (3 by default) |
+| Stale git worktree entries | records in a repo's `.git/worktrees` whose folder is already gone | every missing worktree of that repo was in an agent or temp folder, so one on a drive that isn't plugged in keeps its record |
+| Claude Code temp files of ended sessions | scratchpads, task output and pasted images in `/private/tmp/claude-<uid>` | Claude Code's list of open sessions doesn't include it, and it has been idle for `AGENT_IDLE_DAYS` |
+| Unfinished plugin downloads | `~/.codex/.tmp/plugins-clone-*` and `~/.claude/plugins/cache/temp_git_*`, left by interrupted plugin updates | idle for `AGENT_IDLE_DAYS` |
+
+Worktrees are removed with `git worktree remove`, which keeps the branch and refuses if the worktree picked
+up changes since the scan. Idle worktrees with uncommitted work, or commits on no branch, are kept and
+counted in a note. Worktrees are looked for in the repos under `PROJECT_ROOTS` and in the agents' own
+folders, and build folders inside a listed worktree aren't listed again under projects. A `NEVER_TOUCH`
+pattern such as `'*claude*'` hides Claude Code's items.
+
 ### Build folders in idle projects
 
 makleen looks for projects in `PROJECT_ROOTS`. When that is empty, it uses every folder in your home
@@ -223,7 +243,10 @@ their size. makleen never uninstalls apps.
 What makleen never does:
 
 - **Use `sudo`.** Everything it deletes or moves itself has to be at least two folders deep inside your
-  home folder, and macOS protects its own system files anyway.
+  home folder, or inside Claude Code's temp folder `/private/tmp/claude-<uid>`, and macOS protects its
+  own system files anyway.
+- **Delete AI chat history.** Transcripts, sessions, memories and checkpoints of Claude Code, Codex and
+  other agents are never listed.
 - **Touch protected paths.** Anything matching a `NEVER_TOUCH` pattern you set is skipped by every scan
   and refused by the delete and move steps. Nothing is protected this way by default; a pattern matches
   anywhere in the path, so keep it specific, for example `'*/.claude/*'`.
@@ -280,7 +303,7 @@ makleen schedule install|remove  set up or remove the weekly report
 makleen help | --version
 ```
 
-Categories are `leftovers`, `caches`, `projects` and `extras`. Plain `makleen` without a terminal, for
+Categories are `leftovers`, `caches`, `agents`, `projects` and `extras`. Plain `makleen` without a terminal, for
 example in a pipe, prints the report instead of opening the checklist, and `--dry-run` without a terminal
 shows the plan for the preselected items.
 
@@ -372,6 +395,7 @@ zsh.
 | `EXTRAS` | none | extras that start ticked, by ID |
 | `LEFTOVER_IGNORE` | none | globs of `~/Library` entry names never reported as leftovers |
 | `NEVER_TOUCH` | none | globs of paths never reported, moved or deleted, along with everything inside them; a pattern matches anywhere in the path |
+| `AGENT_IDLE_DAYS` | `3` | days untouched before agent worktrees, temp folders and plugin downloads are listed |
 | `UNUSED_APP_DAYS` | `90` | days without opening before an app is listed in the report |
 | `QUARANTINE_DAYS` | `14` | age at which `makleen purge` deletes a batch |
 | `LOG_DIR` | `logs/` in a clone, else `~/.makleen/logs` | where run logs go |
@@ -435,6 +459,7 @@ offer a GUI. For those, use one of the tools above.
 | `lib/common.zsh` | the item table, sizes, logging, catalog loading, and the safety checks (`NEVER_TOUCH`, `safe_path`) |
 | `lib/leftovers.zsh` | detecting data of uninstalled apps |
 | `lib/caches.zsh` | the `cache` and `editor` catalog entries, and caches that need more than a path: JetBrains, installed apps, Homebrew, Docker |
+| `lib/agents.zsh` | what AI coding agents leave behind: worktrees, temp folders, plugin downloads |
 | `lib/projects.zsh` | idle projects and their build folders |
 | `lib/extras.zsh` | optional extras |
 | `lib/scan.zsh` | running the scanners and the default selection |

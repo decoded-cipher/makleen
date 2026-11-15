@@ -10,7 +10,7 @@
 #   makleen purge [--older-than N | --all]
 #   makleen schedule install|remove  weekly report notification (launchd), never deletes
 #
-# Categories: leftovers caches projects extras
+# Categories: leftovers caches agents projects extras
 #
 # Options:
 #   --only TEXT   preselect only items whose name or path contains TEXT
@@ -45,6 +45,7 @@ USER_CATALOG=${MAKLEEN_CATALOG:-$HOME/.config/makleen/catalog.zsh}  # your own e
 AGENT_LABEL=dev.makleen.weekly
 AGENT_PLIST=$HOME/Library/LaunchAgents/$AGENT_LABEL.plist
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+CLAUDE_TMP=/private/tmp/claude-$UID
 
 # ---- defaults, overridden by $CONFIG_FILE ----
 INACTIVE_DAYS=60
@@ -54,11 +55,12 @@ EXTRAS=()             # extras selected by default in the checklist
 LEFTOVER_IGNORE=()    # glob patterns of ~/Library entry names never reported as leftovers
 NEVER_TOUCH=()        # globs, any case: matching paths are never reported, moved or deleted
 UNUSED_APP_DAYS=90
+AGENT_IDLE_DAYS=3
 QUARANTINE_DAYS=14
 [[ -r $CONFIG_FILE ]] && source $CONFIG_FILE
 
 # The parts live in lib/ next to the real file; ${0:A} resolves symlinks such as ~/.local/bin/makleen.
-for part in common leftovers caches projects extras scan report checklist clean quarantine schedule; do
+for part in common leftovers caches agents projects extras scan report checklist clean quarantine schedule; do
   source ${SCRIPT:h}/lib/$part.zsh || { print -ru2 -- "makleen: missing ${SCRIPT:h}/lib/$part.zsh"; exit 1 }
 done
 unset part
@@ -98,7 +100,7 @@ main() {
       for a in $args; do (( ${ALL_CATEGORIES[(Ie)$a]} )) || die "unknown category: $a (use: $ALL_CATEGORIES)"; done
       (( JSON )) && [[ $cmd != scan ]] && die "--json only works with scan"
       local -a id_cats=(${(u)IDS%%/*})
-      if (( $#args )); then CATS=($args)
+      if (( $#args )); then CATS=(${ALL_CATEGORIES:*args})
       elif (( $#IDS )) && (( ! ${#id_cats:|ALL_CATEGORIES} )); then CATS=(${ALL_CATEGORIES:*id_cats})
       else CATS=($ALL_CATEGORIES)
       fi

@@ -99,7 +99,7 @@ collect_projects() {
     progress "Scanning projects in ${root/#$HOME/$TILDE}…"
     find $root \( -name .git -o -path $HOME/Library \) -prune -o -type d \( $FIND_NAMES \) -prune -print0 2>/dev/null |
     while IFS= read -r -d '' d; do
-      is_artifact $d && ! untouchable $d || continue
+      is_artifact $d && ! untouchable $d && ! inside $d $AGENT_WT || continue
       project_root $d; proj=$REPLY
       is_protected $proj && continue
       rel=${d#$proj/}

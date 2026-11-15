@@ -33,6 +33,9 @@ LEFTOVER_IGNORE=()
 # Empty by default. A pattern matches anywhere in the path, ignoring case, so keep it specific.
 # NEVER_TOUCH=('*/.claude/*' '*/mkcert*')
 
+# AI agent worktrees, temp folders and plugin downloads untouched this many days are listed.
+AGENT_IDLE_DAYS=3
+
 # Apps not opened in this many days are listed (report only).
 UNUSED_APP_DAYS=90
 
