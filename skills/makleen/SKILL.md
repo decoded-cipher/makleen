@@ -1,6 +1,6 @@
 ---
 name: makleen
-description: Find and reclaim disk space on a Mac with makleen, a zsh cleaner for developer machines. Use when the user's Mac is low on disk space or they ask what is using storage, or want to clean caches (npm, Docker, Xcode, Gradle, Homebrew, browsers, editors), node_modules and build folders of old projects, data left behind by uninstalled apps, simulators, emulators or old Node versions. Also use to list, restore or purge makleen's quarantine. macOS only.
+description: Find and reclaim disk space on a Mac with makleen, a zsh cleaner for developer machines. Use when the user's Mac is low on disk space or they ask what is using storage, or want to clean caches (npm, Docker, Xcode, Gradle, Homebrew, browsers, editors), node_modules and build folders of old projects, data left behind by uninstalled apps, worktrees and temp files of AI coding agents, simulators, emulators or old Node versions. Also use to list, restore or purge makleen's quarantine. macOS only.
 ---
 
 # makleen
@@ -12,10 +12,9 @@ clean is logged. Work through makleen instead of deleting files yourself: it hol
 
 ## Find it
 
-1. `command -v makleen`
-2. Otherwise this skill's folder is usually a link into the makleen repo: try `<this skill's folder>/../../makleen`.
-3. Otherwise it isn't installed. Tell the user it installs with `brew install decoded-cipher/tap/makleen`,
-   and install it only if they say so.
+Run `command -v makleen`. If it prints nothing, makleen isn't installed: tell the user it installs with
+`brew install decoded-cipher/tap/makleen`, and install it only if they say so. This skill needs makleen
+0.4.0 or later (`makleen --version`); if it's older, suggest `brew upgrade makleen`.
 
 Always pass `--dry-run` or `--yes` to `makleen clean`, and never run plain `makleen`: they wait for
 keys in a checklist or a prompt you can't answer.

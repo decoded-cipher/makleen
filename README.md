@@ -72,19 +72,27 @@ ln -s "$PWD/makleen" ~/.local/bin/makleen
 
 ## Use it from an AI agent
 
-makleen ships an [Agent Skill](skills/makleen/SKILL.md), so you can ask Claude Code, Codex or another agent
-that reads `SKILL.md` skills to free up space. The agent scans, explains what it found, investigates the
-*check first* items, and cleans only what you approve after showing you the dry-run plan.
+makleen ships an [Agent Skill](skills/makleen/SKILL.md), so you can ask Claude Code, Codex, Cursor or another
+agent that reads `SKILL.md` skills to free up space. The agent scans, explains what it found, investigates
+the *check first* items, and cleans only what you approve after showing you the dry-run plan.
 
-Link the skill into your agent's skills folder. With Homebrew it's in `$(brew --prefix)/share/makleen`:
+Install the skill with the [Skills CLI](https://skills.sh):
+
+```sh
+npx skills add decoded-cipher/makleen --skill makleen --global
+```
+
+The skill drives the `makleen` command, so install that as well ([Quick start](#quick-start)); if it's
+missing, the agent offers to install it with Homebrew. `npx skills --help` shows how to pick agents,
+update the skill or remove it.
+
+Without Node.js, link the skill into your agent's skills folder yourself. Homebrew puts it in
+`$(brew --prefix)/share/makleen/skills/makleen`; in a clone it's `skills/makleen`:
 
 ```sh
 ln -s "$(brew --prefix)/share/makleen/skills/makleen" ~/.claude/skills/makleen    # Claude Code
-ln -s "$(brew --prefix)/share/makleen/skills/makleen" ~/.agents/skills/makleen    # Codex, and other agents that read ~/.agents/skills
+ln -s "$(brew --prefix)/share/makleen/skills/makleen" ~/.agents/skills/makleen    # Codex and other agents
 ```
-
-From a clone, link `"$PWD/skills/makleen"` instead. Keep it a link rather than a copy: when makleen isn't
-on your `PATH`, the skill finds it through the link.
 
 The skill drives two options that are also useful in your own scripts: `makleen scan --json` lists every
 item with an ID, and `makleen clean --id ID,...` picks exactly those items.
@@ -481,7 +489,8 @@ rm -rf ~/.makleen ~/.config/makleen
 ```
 
 Then `brew uninstall makleen`, or for a clone remove `~/.local/bin/makleen` and delete the repo folder,
-including `logs/` if you don't want the history. Remove the skill links from your agents' skills folders.
+including `logs/` if you don't want the history. Remove the skill with `npx skills remove --global makleen`,
+or delete the links you made.
 
 ## License
 
