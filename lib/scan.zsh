@@ -27,7 +27,7 @@ collect_all() {
   chatty && print -u2 "${BOLD}makleen${RESET} ${DIM}· looking for space to reclaim${RESET}"
   for cat in $CATS; do
     t0=$EPOCHREALTIME
-    collect_$cat
+    COREPACK_ENABLE_NETWORK=0 collect_$cat </dev/null
     progress_done
     if chatty; then
       category_kb $cat
